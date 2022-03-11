@@ -1,0 +1,26 @@
+﻿Name,T* (K),P* (Mpa),r* (kg/L),MW,dry dens g/cm3 @35C,T(K),Known Source,Notes
+PB,522,424,0.99,1.00E+30,,,,Poly-Butylene <--- verify this later
+PC,755,534,1.275,1.00E+09,,,Nonequilibrium Lattice Fluids: A Predictive Model for the Solubility in Glassy Polymers,
+TMPC,761.6,446.4,1.1739,1.00E+30,,,,
+HFPC,716.5,446,1.6184,1.00E+30,,,,
+PSF,830,600,1.31,1.00E+30,,,,Polysulfone
+PS,750,360,1.099,1.00E+30,,,,Polystyrene
+PMMA,695,560,1.27,1.00E+30,"1.172 or 1.181, latter more likely",,,
+PTMSP,515,550,1.25,1.00E+30,,,,
+PTMSP (Sarti),610,380,1.125,1.00E+30,0.77,,,
+PVC,736,415,1.4577,1.00E+30,,,,
+PVAC,592,510,1.284,1.00E+30,,,,
+PEMA,602,567.5,1.2212,1.00E+30,,,,
+PnBMA,596,442,1.136,1.00E+30,,,,Poly -- -- Methacrylate (modified?)
+PMA,604,514,1.263,1.00E+30,,,,
+PDMS,476,302,1.104,1.00E+30,,,,
+PPO,739,479,1.177,1.00E+30,,,,
+PET,785,730,1.39,1.00E+30,,,,
+AF2400,624,250,2.13,1.00E+30,,,,
+AF1600,575,280,2.16,1.00E+30,,,,
+KALREZB,550,400,2.19,1.38E+02,,,,
+PEUT,550,450,1.132,1.00E+30,,,,
+TPBO-0.25,900,474,1.6624,1.00E+30,1.393,278.15,,
+XLPEO,595,620,1.241,1.00E+30,,,Equation of State Modeling of the Solubility of CO2/C2H6 Mixtures in Cross-Linked Poly(ethylene oxide),
+PIM-1,872,524,1.438,1.00E+30,1.143,,https://doi.org/10.1016/j.fluid.2013.03.003,"Skeptical until vetted, density came from ""Mixed gas sorption in glassy polymeric membranes. III. CO2/CH4 mixtures in a polymer of intrinsic microporosity (PIM-1): Effect of temperature"""
+TFE/PMVE49,509,395,2.244,1.00E+30,rubbery,,,

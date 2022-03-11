@@ -1,0 +1,13 @@
+﻿Chemical 1,Chemical 2,Kij value,Kij error
+CH4,CO2,0.09,
+CH4,N2,0.03,
+CH4,C2H4,0.022,
+CH4,C2H6,-0.003,
+CO2,C2H4,0.056,
+CO2,C2H6,0.13,
+N2,CO2,-0.02,
+C2H4,N2,0.086,
+C2H4,C2H6,0.01,
+C2H6,N2,0.044,
+C3,CH4,0.016,
+Butane,C2H6,0.01,
