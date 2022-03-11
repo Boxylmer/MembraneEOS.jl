@@ -1,3 +1,21 @@
+"""
+WHEN UPDATING CHEMICAL LOOKUP TABLES WITH NEW VALUE TYPES
+
+The following must be updated
+
+- Add the indices in ChemicalLookupHelper
+- Add the values in the ChemicalParameters struct itself
+- Update the ChemicalParameters constructor functions
+- Update the docs table with the units of what was added
+- Add the kwarg to the ChemicalParameters manual constructor
+- Create the getter function for the parameters e.g., `characteristic_density(::ChemicalParameters)` 
+- Update `strip_measurement_to_value`
+- Update the tests :)
+"""
+
+
+
+
 """Structs and globals"""
 struct UnorderedChemicalPair; a::String; b::String; end  # courtesy of Gandalf from HoJ
 Base.hash(x::UnorderedChemicalPair, h::UInt) = hash(x.a < x.b ? (x.a, x.b) : (x.b, x.a), h)
