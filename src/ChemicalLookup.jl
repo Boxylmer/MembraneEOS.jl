@@ -82,10 +82,10 @@ function is_chemical_in_database(chemical_name::String)
 end
 
 module ChemicalLookupHelper
-    const POLYMER_PARAM_DB = "polymer_parameters.csv"
-    const CHEMICAL_PARAM_DB = "chemical_parameters.csv"
-    const PREOS_KIJ_DB = "PR_binary_interactions.csv"
-    const SLEOS_KIJ_DB = "SL_binary_interactions.csv"
+    const POLYMER_PARAM_DB = joinpath("..", "ChemicalData", "polymer_parameters.csv")
+    const CHEMICAL_PARAM_DB = joinpath("..", "ChemicalData", "chemical_parameters.csv")
+    const PREOS_KIJ_DB = joinpath("..", "ChemicalData", "PR_binary_interactions.csv")
+    const SLEOS_KIJ_DB = joinpath("..", "ChemicalData", "SL_binary_interactions.csv")
     
     # Chemical DB lookup cols
     const CHEM_NAME_COL = 1
