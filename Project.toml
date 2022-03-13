@@ -11,6 +11,7 @@ MembraneBase = "a9449b16-1c3f-48ab-aa2c-0b9c6d97beee"
 Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 
 [compat]
+Revise = "3"
 julia = "1"
 
 [extras]
