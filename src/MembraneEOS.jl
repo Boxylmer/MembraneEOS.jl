@@ -2,7 +2,7 @@ module MembraneEOS
     using MembraneBase
     using CSV
     using Clapeyron
-    # using Measurements
+    # using Measurements  # causes stack overflow errors somehow??
 
     include("ChemicalLookup.jl")
     include("ClapeyronWrapper.jl")
