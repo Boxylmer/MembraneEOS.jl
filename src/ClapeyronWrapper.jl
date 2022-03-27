@@ -36,13 +36,11 @@ end
 function PR(chemical::String)
 # look up using internal ChemicalParameters and return a Clapeyron struct
 end
-
 function PR(chemical::AbstractVector{String})
   # look critical param CSV -> ChemicalParameters 
   # look up from binary interaction CSV -> UnorderedChemicalPair
   # use both of these to call the constructor below
 end
-
 function PR(pc_atm::AbstractVector, tc_k::AbstractVector, omega::AbstractVector, KIJ_matrix=nothing)
 # construct and return
 end
