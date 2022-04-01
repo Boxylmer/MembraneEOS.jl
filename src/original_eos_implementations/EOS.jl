@@ -14,8 +14,6 @@ function initmatrix(components::AbstractVector; initial_value = 0.0)
     Matrix(initial_value*I,matrix_size,matrix_size)
 end
 
-# function symmetricify()
-# end
 
 # EOS Accessors 
 
