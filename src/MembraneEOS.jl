@@ -5,7 +5,7 @@ module MembraneEOS
     # using Measurements  # causes stack overflow errors somehow??
 
     include("ChemicalLookup.jl")
-    include("ClapeyronWrapper.jl")
+    include("PRClapeyronWrapper.jl")
 
     export ChemicalParameters
     export UnorderedChemicalPair
