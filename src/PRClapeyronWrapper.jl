@@ -20,6 +20,8 @@ struct PRParam2{AT, BT, TCT, PCT, MWT} <: EoSParam
     Mw::SingleParam{MWT}
 	#PRParam2(a, b, Tc, Pc, Mw) = PRParam2(promote(a, b)..., promote(Tc, Pc, Mw)...)
 end
+
+
 struct PR2{T <: IdealModel,α,c,γ,K} <: Clapeyron.PRModel
     components::Array{String,1}
     icomponents::UnitRange{Int}
