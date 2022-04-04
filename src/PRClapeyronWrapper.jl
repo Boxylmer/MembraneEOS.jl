@@ -34,7 +34,7 @@ Base.length(model::PR2) = length(model.icomponents)
 Base.show(io::IO,model::PR2) = Clapeyron.eosshow(io,model)
 # Base.show(io::IO,::MIME"text/plain",model::PR2) = Clapeyron.eosshow(io,mime,model)
 Base.show(io::IO, mime::MIME"text/plain", model::PR2) = Clapeyron.eosshow(io,mime,model)
-Clapeyron.molecular_weight(model::PR2,z=1.0) =Clapeyron.comp_molecular_weight(Clapeyron.mw(model),z)
+Clapeyron.molecular_weight(model::PR2,z=1.0) = Clapeyron.comp_molecular_weight(Clapeyron.mw(model),z)
 # Clapeyron.@registermodel PR2
 
 vdW1fRule() = Clapeyron.vdW1fRule(Clapeyron.vdW1fRuleParam())
@@ -83,8 +83,8 @@ co2model = cubic_maker(PR, [304.13], [72.8], [0.239], ident)
 volume(co2model, 101325, 308.15)
 
 using Measurements
-co2model = cubic_maker(PR, [304.13 ± 33], [72.8 ± 10], [0.239 ± 0.2], ident)
-volume(co2model, 101325 ± 2, 308.15 ± 03)
+co2model = cubic_maker(PR, [304.13 ± 0.1], [72.8 ± 10], [0.239 ± 0.2], ident)
+volume(co2model, 101325 ± 100, 308.15 ± 34)
 
 # # wrap individual EOS that we intend to use.
 # function PR(pc_atm::Number, tc_k::Number, ω::Number)
