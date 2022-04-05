@@ -21,7 +21,6 @@ struct PRParam2{AT, BT, TCT, PCT, MWT} <: EoSParam
 	#PRParam2(a, b, Tc, Pc, Mw) = PRParam2(promote(a, b)..., promote(Tc, Pc, Mw)...)
 end
 
-
 struct PR2{T <: IdealModel,α,c,γ,K} <: Clapeyron.PRModel
     components::Array{String,1}
     icomponents::UnitRange{Int}
@@ -32,6 +31,8 @@ struct PR2{T <: IdealModel,α,c,γ,K} <: Clapeyron.PRModel
     idealmodel::T
     references::Array{String,1}
 end
+
+
 Base.length(model::PR2) = length(model.icomponents)
 Base.show(io::IO,model::PR2) = Clapeyron.eosshow(io,model)
 # Base.show(io::IO,::MIME"text/plain",model::PR2) = Clapeyron.eosshow(io,mime,model)

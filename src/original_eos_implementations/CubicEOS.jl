@@ -2,24 +2,24 @@
 Cubic Equations of State
 =#
 
-struct CubicState{MT, CP<:ChemicalParameters, MOLE_T, KIJ_T, PT, VT, TT, BMT, AMT, ZT, BT, AT, ALP_T, PPT, FT, N, L} <: EquationOfState
-    model::MT
-    components::SVector{N, CP}
-    mole_fractions::SVector{N, MOLE_T}
-    kij::SMatrix{N, N, KIJ_T, L}
-    pressure::PT
-    volume::VT 
-    temperature::TT
+# struct CubicState{MT, CP<:ChemicalParameters, MOLE_T, KIJ_T, PT, VT, TT, BMT, AMT, ZT, BT, AT, ALP_T, PPT, FT, N, L} <: EquationOfState
+#     model::MT
+#     components::SVector{N, CP}
+#     mole_fractions::SVector{N, MOLE_T}
+#     kij::SMatrix{N, N, KIJ_T, L}
+#     pressure::PT
+#     volume::VT 
+#     temperature::TT
 
-    b_mixed::BMT
-    a_mixed::AMT
-    z::ZT
-    b::SVector{BT}  
-    a::SVector{N, AT}
-    alpha::SVector{N, ALP_T}
-    partial_pressures::SVector{N, PPT}
-    fugacities::FT 
-end
+#     b_mixed::BMT
+#     a_mixed::AMT
+#     z::ZT
+#     b::SVector{BT}  
+#     a::SVector{N, AT}
+#     alpha::SVector{N, ALP_T}
+#     partial_pressures::SVector{N, PPT}
+#     fugacities::FT 
+# end
 
 # Peng Robinson 
 struct PengRobinson end
@@ -31,12 +31,12 @@ function get_kij_matrix(::PengRobinson, components::AbstractVector{<:String})
     return get_kij_matrix(PRKijLookup, components)
 end 
 
-EOS(::PengRobinson, args...; kwargs...) = CubicState(PengRobinson(), args...; kwargs...)  # forward the PREoS specific constructor to the eos ezpz constructor
-"""
-Peng-Robinson Equation of State
-Wrapper around `CubicState` i.e., `CubicState(model=PengRobinson(), ...)`
-"""
-PengRobinsonState(args...; kwargs...) = CubicState(PengRobinson(), args...; kwargs...)
+# EOS(::PengRobinson, args...; kwargs...) = CubicState(PengRobinson(), args...; kwargs...)  # forward the PREoS specific constructor to the eos ezpz constructor
+# """
+# Peng-Robinson Equation of State
+# Wrapper around `CubicState` i.e., `CubicState(model=PengRobinson(), ...)`
+# """
+# PengRobinsonState(args...; kwargs...) = CubicState(PengRobinson(), args...; kwargs...)
 get_cubic_eos_constants(::PengRobinson) = 0.45724, 0.07780, 1-√2, 1+√2  # Ωa, Ωb, c1, c2
 alpha(::PengRobinson, t, tc, acentric_factor) = (1 + m(PengRobinson(), acentric_factor) * (1 - sqrt(t/tc)))^2
 m(::PengRobinson, acentric_factor) = 0.37464 + 1.54226*acentric_factor + 0.26992*acentric_factor^2

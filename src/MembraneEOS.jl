@@ -2,10 +2,12 @@ module MembraneEOS
     using MembraneBase
     using CSV
     using Clapeyron
+    using StaticArrays
     # using Measurements  # causes stack overflow errors somehow??
 
     include("ChemicalLookup.jl")
-    include("PRClapeyronWrapper.jl")
+    include(joinpath("original_eos_implementations", "CubicEOS.jl"))
+    # include("PRClapeyronWrapper.jl")
 
     export ChemicalParameters
     export UnorderedChemicalPair
