@@ -14,8 +14,6 @@ The following must be updated
 """
 
 
-
-
 """Structs and globals"""
 struct UnorderedChemicalPair; a::String; b::String; end  # courtesy of Gandalf from HoJ
 Base.hash(x::UnorderedChemicalPair, h::UInt) = hash(x.a < x.b ? (x.a, x.b) : (x.b, x.a), h)
