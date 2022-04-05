@@ -235,7 +235,7 @@ function cubic_alphas(model, t, components::AbstractVector{<:ChemicalParameters}
 end
 
 function cubic_a_parameters(omega_a, alphas, components::AbstractVector{<:ChemicalParameters})
-    return SVector{length(components)}(omega_a * (PolymerMembranes.R_ATM_L_K_MOL^2) * (critical_temperature.(components).^2) ./ critical_pressure.(components) .* alphas)
+    return SVector{length(components)}(omega_a * (R_ATM_L_K_MOL^2) * (critical_temperature.(components).^2) ./ critical_pressure.(components) .* alphas)
 end
 
 function cubic_b_parameters(omega_b, components::AbstractVector{<:ChemicalParameters})
@@ -243,12 +243,13 @@ function cubic_b_parameters(omega_b, components::AbstractVector{<:ChemicalParame
 end
 
 
-######### stuff to eventuall replace the EOS system above, but for now will exist concurrently until everything is moved over
+
 struct CubicModel{MT, CPT, KIJ_T, N, L}
     modeltype::MT  # eventually add types to PengRobinson, VanDerWaals, etc, and make this specific
     components::SVector{N, CPT}
     kij::SMatrix{N, N, KIJ_T, L}
 end
+
 
 function CubicModel(modeltype, components::Vector{<:ChemicalParameters}, kij::Matrix{<:Number})
     n = length(components)
@@ -270,6 +271,29 @@ end
 function CubicModel(modeltype, component::String)
     return CubicModel(modeltype, [component])
 end
+
+# wrap individual EOS that we intend to use.
+function PR(pc_atm::Number, tc_k::Number, ω::Number)
+    # return PR(...) from the clapeyron library
+end
+
+function PR(chemical::String)
+	# look up using internal ChemicalParameters and return a Clapeyron struct
+end
+function PR(chemical::AbstractVector{String})
+    # look critical param CSV -> ChemicalParameters 
+    # look up from binary interaction CSV -> UnorderedChemicalPair
+    # use both of these to call the constructor below
+end
+function PR(pc_atm::AbstractVector, tc_k::AbstractVector, omega::AbstractVector, KIJ_matrix=nothing)
+    if isnothing(KIJ_matrix)
+        @show KIJ_matrix = initmatrix(pc_atm)
+    end
+	@show params = [ChemicalParameters(critical_temperature=tc_k[i], critical_pressure=pc_atm[i], acentric_factor=omega[i]) for i in eachindex(tc_k, pc_atm, omega)]
+    return CubicModel(PengRobinson(), params, KIJ_matrix)
+end
+
+
 
 # Need to define an easy constructor(s) for this and a bunch of functions like
 function compressibility_factor(model::CubicModel, p, t, mole_fractions=[1])
