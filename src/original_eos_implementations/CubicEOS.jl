@@ -120,21 +120,6 @@ function CubicModel(modeltype, components::AbstractVector{<:CubicParameters})
     return CubicModel(modeltype, components, initmatrix(components))
 end
 
-# function CubicModel(modeltype, components::AbstractVector{<:String})
-#     kij = get_kij_matrix(modeltype, components)
-#     component_parameters = ChemicalParameters(components)
-#     return CubicModel(modeltype, component_parameters, kij)
-# end
-# function CubicModel(modeltype, component::ChemicalParameters)
-#     return CubicModel(modeltype, [component])
-# end
-# function CubicModel(modeltype, component::String)
-#     return CubicModel(modeltype, [component])
-# end
-
-# wrap individual EOS that we intend to use.
-
-
 function PR(chemical::String)
     component_parameters = ChemicalParameters(chemical)
     cubic_parameters = CubicParameters(component_parameters)

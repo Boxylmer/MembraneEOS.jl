@@ -44,7 +44,7 @@ function test_preos_pvt_solvers(;precision=10, speedtests=true)
         @test time_multi_comp < target_time
     end
 end
-function test_preos_pvt_solvers_methods(;precision=10, speedtests=true)
+function test_preos_pvt_solvers_methods(;precision=10)
     # nitrogen = PengRobinsonChemical(33.5, 126.2, 0.04, "N2")
     # methane = PengRobinsonChemical(45.79, 190.8, 0.012, "CH4")
     
