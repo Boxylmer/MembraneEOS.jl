@@ -1,3 +1,16 @@
+@testset "TestSanchezLacombe.jl" begin
+
+
+    model_co2 = MembraneEOS.SL([630.0, 630.0], [300.0, 300.0], [1.515, 1.515], [44.0, 44.0], [0 0; 0 0])
+    model_co2_pure = MembraneEOS.SL([630.0], [300.0], [1.515], [44.0])
+
+    model_pdms = MembraneEOS.SL([302.0], [476.0], [1.104], [1.00E+30])
+    @show MembraneEOS.mass_density(model_pdms, 1, 273.15)
+    @show MembraneEOS.chemical_potential(model_pdms, 1, 273.15)
+    @show MembraneEOS.chemical_potential(model_co2, 1, 273.15, [0.0, 0.2])
+    @show MembraneEOS.chemical_potential(model_co2_pure, 1, 273.15)
+end
+
 function test_sanchez_lacombe_pure_gas()
     O2 = ChemicalParameters(molecular_weight=32, characteristic_temperature=170.0, characteristic_pressure=280.0, characteristic_density=1.29,
         critical_pressure=49.8, critical_temperature=154.6, acentric_factor=0.02)
@@ -67,8 +80,6 @@ function test_sanchez_lacombe_methods()
     
     
 end
-
-
 function test_sanchez_lacombe()
     @testset "TestSanchezLacombe.jl" begin
         test_sanchez_lacombe_pure_gas()

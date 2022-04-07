@@ -32,6 +32,12 @@ m(::PengRobinson, acentric_factor) = 0.37464 + 1.54226*acentric_factor + 0.26992
 
 # define all general computation methods
 
+function compute_ideal_partial_pressures(pressure, mole_fractions)
+    N = length(mole_fractions)
+    partial_pressures = SVector{N}(pressure .* mole_fractions)
+    return partial_pressures
+end
+
 function cubic_eos_compressibility(A, B, c1, c2)
     d = 1
     c = (c1 + c2 - 1)*B - 1
