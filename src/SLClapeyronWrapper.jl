@@ -41,6 +41,10 @@ function mass_density(model::Clapeyron.SL, p_mpa, t_k, z=[1])
     return Clapeyron.mass_density(model, p_mpa * 1.0e6, t_k, z) * 0.001
 end
 
+"Mass density in g/cm^3"
+VT_mass_density(model::Clapeyron.SL, v_l_mol, z=[1]) = molecular_weight(model) ./ v_l_mol .* z  ./ 1000 
+ρ_
+
 "Chemical potential in J/mol"
 chemical_potential(model::Clapeyron.SL, p_mpa, t_k, z=[1]) = Clapeyron.chemical_potential(model, p_mpa * 1.0e6, t_k, z)
 
@@ -48,5 +52,6 @@ chemical_potential(model::Clapeyron.SL, p_mpa, t_k, z=[1]) = Clapeyron.chemical_
 VT_chemical_potential(model::Clapeyron.SL, v_l_mol, t_k, z=[1]) = Clapeyron.VT_chemical_potential(model, v_l_mol / 1000, t_k, z)
 
 # todo 
-ρTω_activity(model::Clapeyron.SL, ρ_g_cm3, t_k, )
-ρTω_chemical_potential
+
+# ρTω_chemical_potential(model::Clapeyron.SL, ρ_g_cm3, t_k, ω=[1]) = VT_chemical_potential()
+# ρTω_activity(model::Clapeyron.SL, ρ_g_cm3, t_k, ω=[1]) = 
