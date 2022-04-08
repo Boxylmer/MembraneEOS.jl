@@ -38,9 +38,9 @@ end
 # model = MembraneEOS.PR([123 ± 1, 124], [563, 78], [0, 0.012±0.2])
 # vol = MembraneEOS.volume(model, 1, 273.15, [0.5, 0.5])
 
-model = MembraneEOS.PR("CO2")
-vol = MembraneEOS.volume(model, 1, 273.15) 
-pres = MembraneEOS.pressure(model, vol, 273.15)
+# model = MembraneEOS.PR("CO2")
+# vol = MembraneEOS.volume(model, 1, 273.15) 
+# pres = MembraneEOS.pressure(model, vol, 273.15)
 
 # model = MembraneEOS.PR(["CO2", "CH4"])
 # vol = MembraneEOS.volume(model, 15±0.1, 273.155±0.1, [0.5±0.1, 0.5±0.1])

@@ -1,7 +1,4 @@
 @testset "TestSanchezLacombe.jl" begin
-
-
-    
     model_pdms = MembraneEOS.SL([302.0], [476.0], [1.104], [1.00E+30])
     # @show MembraneEOS.mass_density(model_pdms, 1, 273.15)
     # @show MembraneEOS.chemical_potential(model_pdms, 1, 273.15)
@@ -17,5 +14,9 @@
     vol = MembraneEOS.volume(model_co2, 1., 273.15, [0.5, 0.5])
     pres = MembraneEOS.pressure(model_co2, vol, 273.15, [0.5, 0.5])
     @test 1. ≈ pres
+
+    μ_pure = chemical_potential(model_co2_pure, 1, 273.15)[1]
+    μ_psuedo_pure = chemical_potential(model_co2, 1, 273.15, [1, 0])[1]
+    @test μ_pure ≈ μ_psuedo_pure
     
 end

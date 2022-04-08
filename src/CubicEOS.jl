@@ -132,7 +132,7 @@ function PR(chemical::String)
     return PR(cubic_parameters)
 end
 function PR(chemicals::AbstractVector{String})
-    @show KIJ_matrix = get_kij_matrix(PengRobinson(), chemicals)
+    KIJ_matrix = get_kij_matrix(PengRobinson(), chemicals)
     component_parameters = ChemicalParameters(chemicals)
     cubic_parameters = CubicParameters.(component_parameters)
     return PR(cubic_parameters, KIJ_matrix)
@@ -182,6 +182,7 @@ function VT_compressibility_factor(model::CubicModel, v_l_mol, t_k, mole_fractio
     return cubic_eos_compressibility(A, B, c1, c2)
 end
 
+"Get pressure in atm"
 function pressure(model::CubicModel, v_l_mol, t_k, mole_fractions=[1])
     omega_a, omega_b, c1, c2 = get_cubic_eos_constants(model.modeltype)
     # now that we know we have temperature, lets do all the temperature related calculations we can
@@ -195,12 +196,14 @@ function pressure(model::CubicModel, v_l_mol, t_k, mole_fractions=[1])
     return cubic_eos_pressure(R_ATM_L_K_MOL, t_k, v_l_mol, a_mixed, b_mixed, c1, c2)
 end
 
+"Get volume in L/mol"
 function volume(model::CubicModel, p_atm, t_k, mole_fractions=[1])
     z = compressibility_factor(model, p_atm, t_k, mole_fractions)
     v = z * R_ATM_L_K_MOL * t_k / p_atm
     return v
 end
 
+"Get a vector of fugacities in atm"
 function fugacity(model::CubicModel, p_atm, t_k, mole_fractions=[1])
     omega_a, omega_b, c1, c2 = get_cubic_eos_constants(model.modeltype)
     b_values = cubic_b_parameters(omega_b, model.components)
