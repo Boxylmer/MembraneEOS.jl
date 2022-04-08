@@ -30,7 +30,7 @@ pressure(model::Clapeyron.SL, v_l_mol, t_k, z=[1]) = Clapeyron.pressure(model, v
 volume(model::Clapeyron.SL, p_mpa, t_k, z=[1]) = Clapeyron.volume(model, p_mpa * 1e6, t_k, z) * 1000
 
 "Fugacity in MPa"
-fugacity(model::Clapeyron.SL, p_mpa, t_k, z=[1]) = Clapeyron.fugacity_coefficient(model, p_mpa * 1e6, t_k, z) .* p_mpa
+fugacity(model::Clapeyron.SL, p_mpa, t_k, z=[1]) = Clapeyron.fugacity_coefficient(model, p_mpa * 1e6, t_k, z) .* p_mpa .* z
 
 compressibility_factor(model::Clapeyron.SL, p_mpa, t_k, z=[1]) = Clapeyron.compressibility_factor(model, p_mpa * 1e6, t_k, z)
 
@@ -46,3 +46,7 @@ chemical_potential(model::Clapeyron.SL, p_mpa, t_k, z=[1]) = Clapeyron.chemical_
 
 "Chemical potential in J/mol"
 VT_chemical_potential(model::Clapeyron.SL, v_l_mol, t_k, z=[1]) = Clapeyron.VT_chemical_potential(model, v_l_mol / 1000, t_k, z)
+
+# todo 
+ρTω_activity(model::Clapeyron.SL, ρ_g_cm3, t_k, )
+ρTω_chemical_potential
