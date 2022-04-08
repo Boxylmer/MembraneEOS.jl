@@ -11,19 +11,25 @@ module MembraneEOS
         matrix_size = length(components)
         ones(matrix_size,matrix_size) * initial_value
     end
-    
+
     include("ChemicalLookup.jl")
-    
     include(joinpath("CubicEOS.jl"))
     export PR
     include(joinpath("SLClapeyronWrapper.jl"))
     export SL
 
-    export mass_density
-    export chemical_potential
+    # shared methods
     export pressure
     export volume
+    export fugacity
+    export compressibility_factor
+    export VT_compressibility_factor
     
+    # lattice fluid methods
+    export mass_density
+    export chemical_potential
+    export VT_chemical_potential
+
     export get_kij
     export get_kij_matrix
 

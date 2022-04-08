@@ -21,6 +21,21 @@ function SL(p★::AbstractVector, t★::AbstractVector, ρ★::AbstractVector, m
     return Clapeyron.SL(components, icomponents, mixing, packagedparams, ideal, String[])
 end
 
+
+# functionality
+"Pressure in MPa"
+pressure(model::Clapeyron.SL, v_l_mol, t_k, z=[1]) = Clapeyron.pressure(model, v_l_mol * 1e-3, t_k, z) * 1e-6
+
+"Volume in L/mol"
+volume(model::Clapeyron.SL, p_mpa, t_k, z=[1]) = Clapeyron.volume(model, p_mpa * 1e6, t_k, z) * 1000
+
+"Fugacity in MPa"
+fugacity(model::Clapeyron.SL, p_mpa, t_k, z=[1]) = Clapeyron.fugacity_coefficient(model, p_mpa * 1e6, t_k, z) .* p_mpa
+
+compressibility_factor(model::Clapeyron.SL, p_mpa, t_k, z=[1]) = Clapeyron.compressibility_factor(model, p_mpa * 1e6, t_k, z)
+
+VT_compressibility_factor(model::Clapeyron.SL, v_l_mol, t_k, z=[1]) = Clapeyron.VT_compressibility_factor(model, v_l_mol / 1000, t_k, z)
+
 "Mass density in g/cm^3"
 function mass_density(model::Clapeyron.SL, p_mpa, t_k, z=[1])
     return Clapeyron.mass_density(model, p_mpa * 1.0e6, t_k, z) * 0.001
@@ -29,8 +44,5 @@ end
 "Chemical potential in J/mol"
 chemical_potential(model::Clapeyron.SL, p_mpa, t_k, z=[1]) = Clapeyron.chemical_potential(model, p_mpa * 1.0e6, t_k, z)
 
-"Pressure in MPa"
-pressure(model::Clapeyron.SL, v_l_mol, t_k, z=[1]) = Clapeyron.pressure(model, v_l_mol * 1e-3, t_k, z) * 1e-6
-
-"Volume in L/mol"
-volume(model::Clapeyron.SL, p_mpa, t_k, z=[1]) = Clapeyron.volume(model, p_mpa * 1e6, t_k, z) * 1000
+"Chemical potential in J/mol"
+VT_chemical_potential(model::Clapeyron.SL, v_l_mol, t_k, z=[1]) = Clapeyron.VT_chemical_potential(model, v_l_mol / 1000, t_k, z)

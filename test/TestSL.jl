@@ -18,5 +18,16 @@
     μ_pure = chemical_potential(model_co2_pure, 1, 273.15)[1]
     μ_psuedo_pure = chemical_potential(model_co2, 1, 273.15, [1, 0])[1]
     @test μ_pure ≈ μ_psuedo_pure
+
+    fug_co2 = fugacity(model_co2_pure, 1, 273.15)
     
+    v = volume(model_co2_pure, 1, 273.15)
+    @show z_pt = compressibility_factor(model_co2_pure, 1, 273.15)
+    @show z_vt = VT_compressibility_factor(model_co2_pure, v, 273.15)
+    @test z_pt ≈ z_vt
+
+    @show μ_pt = chemical_potential(model_co2_pure, 1, 273.15)
+    @show μ_vt = VT_chemical_potential(model_co2_pure, v, 273.15)
+
+
 end
