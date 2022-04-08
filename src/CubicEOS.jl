@@ -152,68 +152,68 @@ end
 
 
 # Need to define an easy constructor(s) for this and a bunch of functions like
-function compressibility_factor(model::CubicModel, p, t, mole_fractions=[1])
+function compressibility_factor(model::CubicModel, p_atm, t_k, mole_fractions=[1])
     omega_a, omega_b, c1, c2 = get_cubic_eos_constants(model.modeltype)
     b_values = cubic_b_parameters(omega_b, model.components)
-    alphas = cubic_alphas(model.modeltype, t, model.components)
+    alphas = cubic_alphas(model.modeltype, t_k, model.components)
     a_values = cubic_a_parameters(omega_a, alphas, model.components)
 
     b_mixed = van_der_waals_mixing_b(b_values, mole_fractions)
     a_mixed = van_der_waals_mixing_a(a_values, mole_fractions, model.kij)
 
-    A = a_mixed * p / (R_ATM_L_K_MOL * t) ^ 2
-    B = b_mixed * p / (R_ATM_L_K_MOL * t)
+    A = a_mixed * p_atm / (R_ATM_L_K_MOL * t_k) ^ 2
+    B = b_mixed * p_atm / (R_ATM_L_K_MOL * t_k)
     return cubic_eos_compressibility(A, B, c1, c2)
 end
 
-function VT_compressibility_factor(model::CubicModel, v, t, mole_fractions=[1])
+function VT_compressibility_factor(model::CubicModel, v_l_mol, t_k, mole_fractions=[1])
     omega_a, omega_b, c1, c2 = get_cubic_eos_constants(model.modeltype)
     b_values = cubic_b_parameters(omega_b, model.components)
-    alphas = cubic_alphas(model.modeltype, t, model.components)
+    alphas = cubic_alphas(model.modeltype, t_k, model.components)
     a_values = cubic_a_parameters(omega_a, alphas, model.components)
 
     b_mixed = van_der_waals_mixing_b(b_values, mole_fractions)
     a_mixed = van_der_waals_mixing_a(a_values, mole_fractions, model.kij)
 
-    p = cubic_eos_pressure(R_ATM_L_K_MOL, t, v, a_mixed, b_mixed, c1, c2)
+    p = cubic_eos_pressure(R_ATM_L_K_MOL, t_k, v_l_mol, a_mixed, b_mixed, c1, c2)
 
-    A = a_mixed * p / (R_ATM_L_K_MOL * t) ^ 2
-    B = b_mixed * p / (R_ATM_L_K_MOL * t)
+    A = a_mixed * p / (R_ATM_L_K_MOL * t_k) ^ 2
+    B = b_mixed * p / (R_ATM_L_K_MOL * t_k)
     return cubic_eos_compressibility(A, B, c1, c2)
 end
 
-function pressure(model::CubicModel, v, t, mole_fractions=[1])
+function pressure(model::CubicModel, v_l_mol, t_k, mole_fractions=[1])
     omega_a, omega_b, c1, c2 = get_cubic_eos_constants(model.modeltype)
     # now that we know we have temperature, lets do all the temperature related calculations we can
     b_values = cubic_b_parameters(omega_b, model.components)
-    alphas = cubic_alphas(model.modeltype, t, model.components)
+    alphas = cubic_alphas(model.modeltype, t_k, model.components)
     a_values = cubic_a_parameters(omega_a, alphas, model.components)
 
     b_mixed = van_der_waals_mixing_b(b_values, mole_fractions)
     a_mixed = van_der_waals_mixing_a(a_values, mole_fractions, model.kij)
 
-    return cubic_eos_pressure(R_ATM_L_K_MOL, t, v, a_mixed, b_mixed, c1, c2)
+    return cubic_eos_pressure(R_ATM_L_K_MOL, t_k, v_l_mol, a_mixed, b_mixed, c1, c2)
 end
 
-function volume(model::CubicModel, p, t, mole_fractions=[1])
-    z = compressibility_factor(model, p, t, mole_fractions)
-    v = z * R_ATM_L_K_MOL * t / p
+function volume(model::CubicModel, p_atm, t_k, mole_fractions=[1])
+    z = compressibility_factor(model, p_atm, t_k, mole_fractions)
+    v = z * R_ATM_L_K_MOL * t_k / p_atm
     return v
 end
 
-function fugacity(model::CubicModel, p, t, mole_fractions=[1])
+function fugacity(model::CubicModel, p_atm, t_k, mole_fractions=[1])
     omega_a, omega_b, c1, c2 = get_cubic_eos_constants(model.modeltype)
     b_values = cubic_b_parameters(omega_b, model.components)
-    alphas = cubic_alphas(model.modeltype, t, model.components)
+    alphas = cubic_alphas(model.modeltype, t_k, model.components)
     a_values = cubic_a_parameters(omega_a, alphas, model.components)
     b_mixed = van_der_waals_mixing_b(b_values, mole_fractions)
     a_mixed = van_der_waals_mixing_a(a_values, mole_fractions, model.kij)
 
-    A_i = a_values .* p / (R_ATM_L_K_MOL * t) ^ 2
-    B_i = b_values .* p / (R_ATM_L_K_MOL * t)
-    A = a_mixed * p / (R_ATM_L_K_MOL * t) ^ 2
-    B = b_mixed * p / (R_ATM_L_K_MOL * t)
+    A_i = a_values .* p_atm / (R_ATM_L_K_MOL * t_k) ^ 2
+    B_i = b_values .* p_atm / (R_ATM_L_K_MOL * t_k)
+    A = a_mixed * p_atm / (R_ATM_L_K_MOL * t_k) ^ 2
+    B = b_mixed * p_atm / (R_ATM_L_K_MOL * t_k)
     z = cubic_eos_compressibility(A, B, c1, c2)
-    partial_pressures = compute_ideal_partial_pressures(p, mole_fractions)
+    partial_pressures = compute_ideal_partial_pressures(p_atm, mole_fractions)
     return cubic_eos_fugacities(mole_fractions, partial_pressures, z, A, A_i, B, B_i, model.kij, c1, c2) 
 end

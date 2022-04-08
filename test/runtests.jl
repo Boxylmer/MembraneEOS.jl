@@ -1,8 +1,8 @@
-using MembraneEOS
+# using MembraneEOS
 using Test
 
 @testset "MembraneEOS.jl" begin
     include("TestChemicalLookup.jl")
-    # include("TestPengRobinson.jl")
-    # include("TestSanchezLacombe.jl")
+    # include("TestPR.jl")
+    include("TestSL.jl")
 end
