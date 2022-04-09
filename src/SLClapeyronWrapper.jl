@@ -82,4 +82,4 @@ function ρTω_chemical_potential(model::Clapeyron.SL, ρ_g_cm3, t_k, ω=[1])
     μ = Clapeyron.VT_chemical_potential(model, v, t_k, z) 
     return μ 
 end
-ρTω_activity(model::Clapeyron.SL, ρ_g_cm3, t_k, ω=[1]) = exp(ρTω_chemical_potential(model, ρ_g_cm3, t_k, ω) / (MembraneBase.R_J_MOL_K * t_k))
+ρTω_activity(model::Clapeyron.SL, ρ_g_cm3, t_k, ω=[1]) = exp.(ρTω_chemical_potential(model, ρ_g_cm3, t_k, ω) ./ (MembraneBase.R_J_MOL_K * t_k))
