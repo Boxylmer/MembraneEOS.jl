@@ -258,7 +258,7 @@ function get_kij(database_dict::Dict{<:UnorderedChemicalPair, <:Number}, chemica
     return kij    
 end
 
-function get_kij_matrix(database_dict::Dict{<:UnorderedChemicalPair, <:Number}, chemical_strings::AbstractVector{<:String}; missing_value=missing, ideal_value=0)
+function get_kij_matrix(database_dict::Dict{<:UnorderedChemicalPair, <:Number}, chemical_strings::AbstractVector{<:String}; missing_value=0, ideal_value=0)
     matrix_size = length(chemical_strings)
     # kijmat = Matrix{Any}(ideal_value, matrix_size, matrix_size)
     kijmat = zeros(Union{Float64, Missing}, (matrix_size, matrix_size))
@@ -286,5 +286,9 @@ function initialize_chemical_lookup()
         PRKijLookup, ChemicalLookupHelper.PREOS_KIJ_DB, 
         ChemicalLookupHelper.PRKIJ_NAME_1, ChemicalLookupHelper.PRKIJ_NAME_2, 
         ChemicalLookupHelper.PRKIJ_KIJVAL, ChemicalLookupHelper.PRKIJ_UNCERT)
-     
+    create_kij_dict_from_csv!(
+        SLKijLookup, ChemicalLookupHelper.SLEOS_KIJ_DB,
+        ChemicalLookupHelper.SLKIJ_NAME_1, ChemicalLookupHelper.SLKIJ_NAME_2,
+        ChemicalLookupHelper.SLKIJ_KIJVAL, ChemicalLookupHelper.SLKIJ_UNCERT
+    )
 end

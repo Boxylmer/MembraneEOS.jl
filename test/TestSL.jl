@@ -30,7 +30,14 @@
     μ_vt = VT_chemical_potential(model_co2_pure, v, 273.15)
     @test μ_pt ≈ μ_vt
 
-    
-
+    co2_ch4_model = SL(["CO2", "CH4"])
+    z = [0.2, 0.8]
+    p = 1; t = 273.15
+    ω = mole_fractions_to_mass_fractions(z, molecular_weight(co2_ch4_model))
+    ρ = mass_density(co2_ch4_model, p, t, z)  # g/cm3
+    v = volume(co2_ch4_model, p, t, z)  # l/mol
+    μ_ρtω = ρTω_chemical_potential(co2_ch4_model, ρ, t, ω)
+    μ = VT_chemical_potential(co2_ch4_model, v, t, z)
+    @test μ ≈ μ_ρtω
 
 end

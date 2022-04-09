@@ -31,7 +31,7 @@ end
 
 # Peng Robinson 
 struct PengRobinson end
-function get_kij(::PengRobinson, component_1::String, component_2::String; default_value=missing)
+function get_kij(::PengRobinson, component_1::String, component_2::String; default_value=0.0)
     if component_1 == component_2 return 0.0 end
     return get_kij(PRKijLookup, component_1, component_2; default_value=default_value)  # maybe add a default value?
 end
@@ -185,6 +185,8 @@ function fugacity(model::CubicModel, p_atm, t_k, mole_fractions=[1])
     partial_pressures = compute_ideal_partial_pressures(p_atm, mole_fractions)
     return cubic_eos_fugacities(mole_fractions, partial_pressures, z, A, A_i, B, B_i, model.kij, c1, c2) 
 end
+
+molecular_weight(model::CubicModel) = molecular_weight.(model.components)
 
 function compressibility_factor(model::CubicModel, p_atm, t_k, mole_fractions=[1])
     omega_a, omega_b, c1, c2 = get_cubic_eos_constants(model.modeltype)

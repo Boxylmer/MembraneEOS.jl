@@ -78,9 +78,11 @@ end
     nitrogen = MembraneEOS.CubicParameters(126.2, 33.5, 0.04, missing)
     methane = MembraneEOS.CubicParameters(190.8, 45.79, 0.012, missing)
 
+    
     chemical_components = [nitrogen, methane]
     mole_fractions = [0.4, 0.6]
     model = PR(chemical_components, MembraneEOS.initmatrix(chemical_components))
+    @test ismissing(molecular_weight(model)[1])
     v_0 = 4
     p = pressure(model, v_0, 273.15, mole_fractions)
     v = volume(model, p, 273.15, mole_fractions)
