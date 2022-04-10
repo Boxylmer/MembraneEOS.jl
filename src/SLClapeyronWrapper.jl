@@ -9,8 +9,10 @@ function get_kij_matrix(::SanchezLacombe, components::AbstractVector{<:String})
 end 
 
 SL(component::String) = SL([component])
-function SL(components::AbstractVector{<:String})
-    KIJ_matrix = get_kij_matrix(SanchezLacombe(), components)
+function SL(components::AbstractVector{<:String}; KIJ_matrix = nothing)
+    if isnothing(kij)
+        KIJ_matrix = get_kij_matrix(SanchezLacombe(), components)
+    end
     component_parameters = ChemicalParameters(components)
     t★ = characteristic_temperature.(component_parameters)
     p★ = characteristic_pressure.(component_parameters)
