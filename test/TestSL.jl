@@ -40,6 +40,9 @@
     μ = VT_chemical_potential(co2_ch4_model, v, t, z)
     @test μ ≈ μ_ρtω
 
-    a = ρTω_activity(co2_ch4_model, ρ, t, ω)
+    @show μ_ρtω = ρTω_chemical_potential(co2_ch4_model, ρ, t, ω)
+    @show μ_ρtω_res = ρTω_chemical_potential_res(co2_ch4_model, ρ, t, ω)
+    @show a = ρTω_activity(co2_ch4_model, ρ, t, ω)
+    @show a_res = ρTω_activity_res(co2_ch4_model, ρ, t, ω)
 
 end
