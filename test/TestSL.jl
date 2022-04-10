@@ -43,9 +43,16 @@
     μ = VT_chemical_potential(co2_ch4_model, v, t, z)
     @test μ ≈ μ_ρtω
 
-    @show μ_ρtω = ρTω_chemical_potential(co2_ch4_model, ρ, t, ω)
-    @show μ_ρtω_res = ρTω_chemical_potential_res(co2_ch4_model, ρ, t, ω)
-    @show a = ρTω_activity(co2_ch4_model, ρ, t, ω)
-    @show a_res = ρTω_activity_res(co2_ch4_model, ρ, t, ω)
+    a_ρTω = ρTω_activity(co2_ch4_model, ρ, t, ω)
+    a = activity(co2_ch4_model, p, t, z)
+    @test a_ρTω ≈ a 
+
+    μ_ρtω_res = ρTω_chemical_potential_res(co2_ch4_model, ρ, t, ω)
+    ρTω_a_res = ρTω_activity_res(co2_ch4_model, ρ, t, ω)
+    μ_pt_res = chemical_potential_res(co2_ch4_model, p, t, z)
+    a_pt_res = activity_res(co2_ch4_model, p, t, z)
+
+    @test a_pt_res ≈ ρTω_a_res
+    @test μ_pt_res ≈ μ_ρtω_res
 
 end

@@ -71,6 +71,9 @@ VT_mass_density(model::Clapeyron.SL, v_l_mol, z=[1]) = Clapeyron.mw(model) ./ v_
 "Chemical potential in J/mol"
 chemical_potential(model::Clapeyron.SL, p_mpa, t_k, z=[1]) = Clapeyron.chemical_potential(model, p_mpa * 1.0e6, t_k, z)
 
+"Residual chemical potential in J/mol"
+chemical_potential_res(model::Clapeyron.SL, p_mpa, t_k, z=[1]) = Clapeyron.chemical_potential_res(model, p_mpa * 1.0e6, t_k, z)
+
 "Chemical potential in J/mol"
 VT_chemical_potential(model::Clapeyron.SL, v_l_mol, t_k, z=[1]) = Clapeyron.VT_chemical_potential(model, v_l_mol / 1000, t_k, z)
 
@@ -93,6 +96,10 @@ function ρTω_chemical_potential_res(model::Clapeyron.SL, ρ_g_cm3, t_k, ω=[1]
     μ = Clapeyron.VT_chemical_potential_res(model, v, t_k, z) 
     return μ 
 end
+
+activity(model::Clapeyron.SL, p_mpa, t_k, z=[1]) = exp.(chemical_potential(model, p_mpa, t_k, z) ./ (MembraneBase.R_J_MOL_K * t_k))
+
+activity_res(model::Clapeyron.SL, p_mpa, t_k, z=[1]) = exp.(chemical_potential_res(model, p_mpa, t_k, z) ./ (MembraneBase.R_J_MOL_K * t_k))
 
 ρTω_activity(model::Clapeyron.SL, ρ_g_cm3, t_k, ω=[1]) = exp.(ρTω_chemical_potential(model, ρ_g_cm3, t_k, ω) ./ (MembraneBase.R_J_MOL_K * t_k))
 

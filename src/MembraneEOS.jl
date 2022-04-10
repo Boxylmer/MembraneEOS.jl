@@ -30,9 +30,12 @@ module MembraneEOS
     export mass_density
     export VT_mass_density
     export chemical_potential
+    export chemical_potential_res
     export VT_chemical_potential
     export ρTω_chemical_potential
     export ρTω_chemical_potential_res
+    export activity
+    export activity_res
     export ρTω_activity
     export ρTω_activity_res
 
