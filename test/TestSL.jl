@@ -1,4 +1,7 @@
 @testset "TestSanchezLacombe.jl" begin
+
+    test_lookup_model = SL(["CO2", "CH4"], [0 0; 0 0])
+
     model_pdms = MembraneEOS.SL([302.0], [476.0], [1.104], [1.00E+30])
     # @show MembraneEOS.mass_density(model_pdms, 1, 273.15)
     # @show MembraneEOS.chemical_potential(model_pdms, 1, 273.15)

@@ -9,7 +9,7 @@ function get_kij_matrix(::SanchezLacombe, components::AbstractVector{<:String})
 end 
 
 SL(component::String) = SL([component])
-function SL(components::AbstractVector{<:String}, KIJ_matrix = nothing)
+function SL(components::AbstractVector, KIJ_matrix = nothing)
     if isnothing(KIJ_matrix)
         KIJ_matrix = get_kij_matrix(SanchezLacombe(), components)
     end

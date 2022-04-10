@@ -47,7 +47,7 @@ function PR(chemical::String)
     cubic_parameters = CubicParameters(component_parameters)
     return PR(cubic_parameters)
 end
-function PR(chemicals::AbstractVector{String}, KIJ_matrix = nothing)
+function PR(chemicals::AbstractVector, KIJ_matrix = nothing)
     if isnothing(KIJ_matrix) 
         KIJ_matrix = get_kij_matrix(PengRobinson(), chemicals)
     end
