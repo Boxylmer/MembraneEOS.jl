@@ -43,7 +43,7 @@ end
 
 "Mass density in g/cm^3"
 VT_mass_density(model::Clapeyron.SL, v_l_mol, z=[1]) = molecular_weight(model) ./ v_l_mol .* z  ./ 1000 
-ρ_
+
 
 "Chemical potential in J/mol"
 chemical_potential(model::Clapeyron.SL, p_mpa, t_k, z=[1]) = Clapeyron.chemical_potential(model, p_mpa * 1.0e6, t_k, z)

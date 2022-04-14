@@ -197,7 +197,7 @@ characteristic_temperature(params::ChemicalParameters) = params.characteristic_t
 characteristic_pressure(params::ChemicalParameters) = params.characteristic_pressure
 characteristic_density(params::ChemicalParameters) = params.characteristic_density
 
-function strip_measurement_to_value(obj::ChemicalParameters)
+function MembraneBase.strip_measurement_to_value(obj::ChemicalParameters)
     return ChemicalParameters(obj.name, 
         strip_measurement_to_value(obj.molecular_weight), 
         strip_measurement_to_value(obj.critical_temperature), 
@@ -208,7 +208,7 @@ function strip_measurement_to_value(obj::ChemicalParameters)
         strip_measurement_to_value(obj.characteristic_density)
     )
 end
-function strip_measurement_to_value(obj::AbstractVector{<:ChemicalParameters})
+function MembraneBase.strip_measurement_to_value(obj::AbstractVector{<:ChemicalParameters})
     return strip_measurement_to_value.(obj)
 end
 
