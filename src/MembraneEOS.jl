@@ -15,6 +15,9 @@ module MembraneEOS
     include("ChemicalLookup.jl")
     include(joinpath("CubicEOS.jl"))
     export PR
+    export CubicParameters
+    export CubicModel
+    
     include(joinpath("SLClapeyronWrapper.jl"))
     export SL
 
