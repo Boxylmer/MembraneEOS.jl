@@ -56,11 +56,16 @@ function PR(chemicals::AbstractVector, KIJ_matrix = nothing)
     cubic_parameters = CubicParameters.(component_parameters)
     return PR(cubic_parameters, KIJ_matrix)
 end
+function PR(pc_atm::AbstractVector, tc_k::AbstractVector, omega::AbstractVector, mw::AbstractVector, KIJ_matrix=nothing)
+	params = [CubicParameters(tc_k[i], pc_atm[i], omega[i], mw[i]) for i in eachindex(tc_k, pc_atm, omega, mw)]
+    return PR(params, KIJ_matrix)
+end
 function PR(pc_atm::AbstractVector, tc_k::AbstractVector, omega::AbstractVector, KIJ_matrix=nothing)
 	params = [CubicParameters(tc_k[i], pc_atm[i], omega[i]) for i in eachindex(tc_k, pc_atm, omega)]
     return PR(params, KIJ_matrix)
 end
-PR(pc_atm::Number, tc_k::Number, ω::Number) = PR([pc_atm], [tc_k], [ω])
+
+PR(pc_atm::Number, tc_k::Number, ω::Number, mw=missing) = PR(CubicParameters(tc_k, pc_atm, ω, mw))
 PR(params::CubicParameters) = PR([params])
 function PR(params::AbstractVector{<:CubicParameters}, KIJ_matrix=nothing)  # base method
     if isnothing(KIJ_matrix)

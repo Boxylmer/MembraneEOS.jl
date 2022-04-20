@@ -86,7 +86,18 @@ end
     v_0 = 4
     p = pressure(model, v_0, 273.15, mole_fractions)
     v = volume(model, p, 273.15, mole_fractions)
-    # @test v ≈ 4 
+    @test v ≈ 4 
 
+    # test some constructors and make sure they get the results shown before
+    nitrogen_methane_pc = MembraneEOS.critical_pressure.([nitrogen, methane])
+    nitrogen_methane_tc = MembraneEOS.critical_temperature.([nitrogen, methane])
+    nitrogen_methane_ω = MembraneEOS.acentric_factor.([nitrogen, methane])
+    nitrogen_methane_mw = [28, 16.04]
+    model_generic_no_mw = PR(nitrogen_methane_pc, nitrogen_methane_tc, nitrogen_methane_ω)
+    model_generic_with_mw = PR(nitrogen_methane_pc, nitrogen_methane_tc, nitrogen_methane_ω, nitrogen_methane_mw)
+    @test pressure(model_generic_no_mw, v_0, 273.15, mole_fractions) == 
+          pressure(model_generic_with_mw, v_0, 273.15, mole_fractions) ==
+          p 
+    
     test_preos_measurements_validity()
 end
