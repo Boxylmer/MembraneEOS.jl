@@ -41,7 +41,8 @@ module MembraneEOS
     export activity_res
     export ρTω_activity
     export ρTω_activity_res
-
+    export density_upper_bound
+    
     export get_kij
     export get_kij_matrix
 

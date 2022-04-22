@@ -43,7 +43,6 @@ function SL(p★::AbstractVector, t★::AbstractVector, ρ★::AbstractVector, m
     return Clapeyron.SL(components, icomponents, mixing, packagedparams, ideal, String[])
 end
 
-
 # functionality
 "Pressure in MPa"
 pressure(model::Clapeyron.SL, v_l_mol, t_k, z=[1]) = Clapeyron.pressure(model, v_l_mol * 1e-3, t_k, z) * 1e-6
@@ -104,3 +103,14 @@ activity_res(model::Clapeyron.SL, p_mpa, t_k, z=[1]) = exp.(chemical_potential_r
 ρTω_activity(model::Clapeyron.SL, ρ_g_cm3, t_k, ω=[1]) = exp.(ρTω_chemical_potential(model, ρ_g_cm3, t_k, ω) ./ (MembraneBase.R_J_MOL_K * t_k))
 
 ρTω_activity_res(model::Clapeyron.SL, ρ_g_cm3, t_k, ω=[1]) = exp.(ρTω_chemical_potential_res(model, ρ_g_cm3, t_k, ω) ./ (MembraneBase.R_J_MOL_K * t_k))
+
+"Density upper bound in g/cm^3."
+function density_upper_bound(model::Clapeyron.SL, ω=[1]) 
+    mole_fracs = mass_fractions_to_mole_fractions(ω, molecular_weight(model))
+    return molar_volume_to_density(
+        Clapeyron.lb_volume(model, mole_fracs) * 1000, # m^3/mol -> l/mol
+        mole_fracs,
+        molecular_weight(model)
+    )
+
+end
