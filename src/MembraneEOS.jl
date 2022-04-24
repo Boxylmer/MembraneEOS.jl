@@ -2,7 +2,8 @@ module MembraneEOS
     using MembraneBase
     using MembraneBase: R_ATM_L_K_MOL
     using CSV
-    using Clapeyron
+    import Clapeyron
+    using Clapeyron: SingleParam, PairParam
     using StaticArrays
     using LinearAlgebra
 

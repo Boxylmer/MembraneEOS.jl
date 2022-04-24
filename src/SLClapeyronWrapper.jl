@@ -36,7 +36,7 @@ function SL(p★::AbstractVector, t★::AbstractVector, ρ★::AbstractVector, m
     kij = PairParam("kij", components, kij .* 1.0)
     k1ij =  PairParam("k1", components, zeros(Float64, n, n))
     lij =  PairParam("l", components, zeros(Float64, n, n))
-    mixing = SLk0k1lMixingRule(components, kij, k1ij, lij)
+    mixing = Clapeyron.SLk0k1lMixingRule(components, kij, k1ij, lij)
     ideal = Clapeyron.init_model(Clapeyron.BasicIdeal, components, String[], false)
     premixed_vol, premixed_epsilon = Clapeyron.sl_mix(v★, ε, mixing)
     packagedparams = Clapeyron.SanchezLacombeParam(mwparam, r, premixed_epsilon, premixed_vol)

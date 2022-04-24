@@ -72,7 +72,7 @@ end
 @testset "TestPR.jl" begin
     model_co2 = PR("CO2")
     model_co2_array = PR(["CO2"])
-    @test pressure(model_co2, 4, 273.15) == pressure(model_co2_array, 4, 273.15)
+    @test MembraneEOS.pressure(model_co2, 4, 273.15) == MembraneEOS.pressure(model_co2_array, 4, 273.15)
 
 
     nitrogen = MembraneEOS.CubicParameters(126.2, 33.5, 0.04, missing)
