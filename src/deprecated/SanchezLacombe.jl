@@ -298,7 +298,7 @@ end
 # function VT_compressibility_factor(model::SanchezLacombeModel, v, t, mole_fractions=[1])
 # end
 
-function pressure(model::SanchezLacombeModel, v, t, mole_fractions=[1])
+function MembraneBase.pressure(model::SanchezLacombeModel, v, t, mole_fractions=[1])
     density = molar_volume_to_density(v, mole_fractions, molecular_weight.(model.components))
     mass_fractions = mole_fractions_to_mass_fractions(mole_fractions, molecular_weight.(model.components))
     mixed_characteristic_density = sanchez_lacombe_mixed_characteristic_density(model.components, mass_fractions)

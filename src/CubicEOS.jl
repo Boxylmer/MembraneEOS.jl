@@ -156,7 +156,7 @@ end
 # functionality
 
 "Get pressure in atm"
-function pressure(model::CubicModel, v_l_mol, t_k, mole_fractions=[1])
+function MembraneBase.pressure(model::CubicModel, v_l_mol, t_k, mole_fractions=[1])
     omega_a, omega_b, c1, c2 = get_cubic_eos_constants(model.modeltype)
     # now that we know we have temperature, lets do all the temperature related calculations we can
     b_values = cubic_b_parameters(omega_b, model.components)

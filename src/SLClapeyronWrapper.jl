@@ -45,7 +45,7 @@ end
 
 # functionality
 "Pressure in MPa"
-pressure(model::Clapeyron.SL, v_l_mol, t_k, z=[1]) = Clapeyron.pressure(model, v_l_mol * 1e-3, t_k, z) * 1e-6
+MembraneBase.pressure(model::Clapeyron.SL, v_l_mol, t_k, z=[1]) = Clapeyron.pressure(model, v_l_mol * 1e-3, t_k, z) * 1e-6
 
 "Volume in L/mol"
 volume(model::Clapeyron.SL, p_mpa, t_k, z=[1]) = Clapeyron.volume(model, p_mpa * 1e6, t_k, z) * 1000
