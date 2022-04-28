@@ -74,18 +74,6 @@ function Clapeyron.mix_vε(model::Clapeyron.SL,V,T,z,mix::SLKRule2,r̄,Σz = sum
     ϕ = @. r* z* r̄inv/Σz   # unitless
     p = ε ./ v  # J/mol  /  m^3/mol  -> J/m^3 -> Pa*m^3 / m^3 -> Pa
     Δpij = [p[idx] + p[jdx] - 2 * (1-k[idx, jdx]) * sqrt(p[idx] * p[jdx]) for idx in eachindex(p), jdx in eachindex(p)]
-    
-    # p★_ideal = 0
-    # for idx in eachindex(p, ϕ)
-    #     p★_ideal += ϕ[idx] * p[idx]
-    # end
-    # interaction_effects = 0
-    # for idx in eachindex(p, ϕ), jdx in eachindex(p, ϕ)
-    #     interaction_effects += ϕ[idx] * ϕ[jdx] * Δpij[idx, jdx]
-    # end
-
-    # p★ = p★_ideal - 0.5 * interaction_effects   # square of the Hildebrand Solubility Parameter and cohesive energy density
-
 
     p★ = zero(eltype(z))
     for i in 1:length(z)
@@ -96,7 +84,7 @@ function Clapeyron.mix_vε(model::Clapeyron.SL,V,T,z,mix::SLKRule2,r̄,Σz = sum
             p_j = p[j]
             ϕj = ϕ[j]
             Δpij = p_i + p_j - 2*(1 - k[i,j])*sqrt(p_i*p_j)
-            p★ -= ϕi*ϕj*Δpij #0.5*2
+            p★ -= sqrt(ϕi*ϕj)*Δpij #0.5*2
         end
     end
 

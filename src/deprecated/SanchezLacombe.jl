@@ -1,91 +1,17 @@
-
 struct SanchezLacombe end
 
-struct SanchezLacombeState{CP<:ChemicalParameters, MT, MOLE_T, MASS_T, KIJ_T, PT, VT, TT, PPT, CPT, AT, N, L} <: EquationOfState
-    model::MT
-    components::SVector{N, CP}
-    mole_fractions::SVector{N, MOLE_T}
-    mass_fractions::SVector{N, MASS_T}
-    kij::SMatrix{N, N, KIJ_T, L}
-    pressure::PT
-    volume::VT
-    temperature::TT
-
-    partial_pressures::SVector{N, PPT}
-    # fugacities::FT
-    chemical_potentials::CPT
-    activities::AT
+struct SanchezLacombeParameters{CPT, CTT, CDT, MWT}
+    characteristic_pressure_mpa::CPT
+    characteristic_temperature_k::CTT
+    characteristic_density_g_cm3::CDT
+    molecular_weight::MWT
 end
-EOS(::SanchezLacombe, args...; kwargs...) = SanchezLacombeState(args...; kwargs...)
-function SanchezLacombeState(components::AbstractVector{<:ChemicalParameters}, mole_fractions, kijmatrix; p=nothing, v=nothing, t=nothing, minimal_calculations=false)
-    mass_fractions = mole_fractions_to_mass_fractions(mole_fractions, molecular_weight.(components))
-    if isnothing(t)
-        throw(ErrorException("Solving for temperature is not implemented yet"))
-    
-    elseif isnothing(v)
-        return SanchezLacombeState(components, p*MPA_PER_ATM, t, mass_fractions, kijmatrix)
+SanchezLacombeParameters(cp::ChemicalParameters) = SanchezLacombeParameters(characteristic_pressure(cp), characteristic_temperature(cp), characteristic_density(cp), molecular_weight(cp))
+characteristic_pressure(slp::SanchezLacombeParameters) = slp.characteristic_pressure_mpa
+characteristic_temperature(slp::SanchezLacombeParameters) = slp.characteristic_temperature_k
+characteristic_density(slp::SanchezLacombeParameters) = slp.characteristic_density_g_cm3
+molecular_weight(slp::SanchezLacombeParameters) = slp.molecular_weight
 
-    elseif isnothing(p)
-        density = molar_volume_to_density(v, mole_fractions, molecular_weight.(components))
-        return SanchezLacombeState(components, nothing, t, mass_fractions, kijmatrix; given_density_g_cm3 = density)
-    else
-        throw(ErrorException("Nonequilibrium state not implemented yet"))
-    end
-
-end
-
-function SanchezLacombeState(components::AbstractVector{<:ChemicalParameters}, pressure_mpa::Union{Number, Nothing}, temperature::Number, mass_fractions::AbstractVector{<:Number}, kij::AbstractMatrix; given_density_g_cm3=nothing)
-    num_components = length(components)
-    
-    molecular_weights = molecular_weight.(components)
-    mole_fractions = mass_fractions_to_mole_fractions(mass_fractions, molecular_weights)
-    mixed_characteristic_density = sanchez_lacombe_mixed_characteristic_density(components, mass_fractions)
-    φ = sanchez_lacombe_close_packed_volume_fractions(components, mass_fractions)
-    r_i0 = sanchez_lacombe_ri0.(components)
-    pure_characteristic_volume_i = sanchez_lacombe_pure_characteristic_volume.(components)
-    p★ = sanchez_lacombe_mixed_characteristic_pressure(components, φ, kij)
-    t★ = sanchez_lacombe_mixed_characteristic_temperature(components, φ, p★)
-    v★ = sanchez_lacombe_mixed_characteristic_volume(t★, p★)
-    r_i = sanchez_lacombe_ri.(r_i0, pure_characteristic_volume_i, v★)
-
-    if isnothing(pressure_mpa) && !isnothing(given_density_g_cm3)
-        density_g_cm3 = given_density_g_cm3
-        reduced_density = density_g_cm3 / mixed_characteristic_density
-        pressure_mpa = sanchez_lacombe_reduced_pressure(
-            temperature/t★, 
-            reduced_density, 
-            φ, r_i) * p★
-    elseif isnothing(given_density_g_cm3)
-        reduced_temperature = temperature / t★
-        reduced_pressure = pressure_mpa / p★
-        reduced_density = sanchez_lacombe_reduced_density(components, kij, mole_fractions, temperature, reduced_temperature, reduced_pressure, φ, r_i0, r_i, pure_characteristic_volume_i)
-        density_g_cm3 = reduced_density * mixed_characteristic_density
-    elseif !isnothing(pressure_mpa) && !isnothing(temperature) && !isnothing(given_density_g_cm3)
-        density_g_cm3 = given_density_g_cm3
-        reduced_density = density_g_cm3 / mixed_characteristic_density
-    else
-        throw(ArgumentError("Not enough information to solve state."))
-    end
-    μ = sanchez_lacombe_chemical_potentials(components, kij, φ, r_i0, r_i, pure_characteristic_volume_i, reduced_density, temperature) 
-    activities = sanchez_lacombe_activities(μ, temperature) 
-
-    
-    volume = density_to_molar_volume(density_g_cm3, mole_fractions, molecular_weights)
-    partial_pressures = compute_ideal_partial_pressures(pressure_mpa, mole_fractions)
-    
-
-    SanchezLacombeState(SanchezLacombe(),
-        SVector{num_components}(components), SVector{num_components}(mole_fractions), SVector{num_components}(mass_fractions), SMatrix{num_components, num_components}(kij), 
-        pressure_mpa, volume, temperature, SVector{num_components}(partial_pressures), SVector{num_components}(μ), SVector{num_components}(activities))
-end
-function SanchezLacombeState(components::ChemicalParameters, pressure_mpa::Union{Number, Nothing}, temperature::Number; kwargs...)
-    return SanchezLacombeState([components], pressure_mpa, temperature, [1], [0][:,:]; kwargs...)
-end
-
-# getters
-chemical_potentials(sl::SanchezLacombeState) = sl.chemical_potentials
-
-activities(sl::SanchezLacombeState) = sl.activities
 
 # core math functions
 
@@ -130,7 +56,7 @@ function sanchez_lacombe_reduced_density(components, kij, mole_fractions, temper
 
 end
 
-function sanchez_lacombe_chemical_potentials(components::AbstractVector{<:ChemicalParameters}, kij, mass_fractions, density, temperature)
+function sanchez_lacombe_chemical_potentials(components::AbstractVector{<:SanchezLacombeParameters}, kij, mass_fractions, density, temperature)
     mixed_characteristic_density = sanchez_lacombe_mixed_characteristic_density(components, mass_fractions)
     reduced_density = density / mixed_characteristic_density
     φ = sanchez_lacombe_close_packed_volume_fractions(components, mass_fractions)
@@ -143,7 +69,7 @@ function sanchez_lacombe_chemical_potentials(components::AbstractVector{<:Chemic
     return sanchez_lacombe_chemical_potentials(components, kij, φ, r_i0, r_i, pure_characteristic_volume_i, reduced_density, temperature)
 end
 
-function sanchez_lacombe_chemical_potentials(components::AbstractVector{<:ChemicalParameters}, kij, φ, r_i0, r_i, pure_characteristic_volume_i, reduced_density, temperature)
+function sanchez_lacombe_chemical_potentials(components::AbstractVector{<:SanchezLacombeParameters}, kij, φ, r_i0, r_i, pure_characteristic_volume_i, reduced_density, temperature)
     # J/mol
     p★i = characteristic_pressure.(components)
     Δpij = sanchez_lacombe_Δpij(components, kij)
@@ -183,7 +109,7 @@ function sanchez_lacombe_activities(chemical_potentials, temperature)
     return exp.(chemical_potentials / (R_J_MOL_K * temperature)) 
 end
 
-function sanchez_lacombe_activities(components::AbstractVector{<:ChemicalParameters}, kij, φ, r_i0, r_i, pure_characteristic_volume_i, reduced_density, temperature)
+function sanchez_lacombe_activities(components::AbstractVector{<:SanchezLacombeParameters}, kij, φ, r_i0, r_i, pure_characteristic_volume_i, reduced_density, temperature)
     # J/mol
     if (1 - reduced_density) < 0; return zeros(length(components)); end
     if (reduced_density) < 0; return zeros(length(components)); end
@@ -202,28 +128,28 @@ function sanchez_lacombe_activities(components::AbstractVector{<:ChemicalParamet
     # return exp.(sanchez_lacombe_chemical_potentials(components, kij, φ, r_i0, r_i, pure_characteristic_volume_i, reduced_density, temperature) / (R_J_MOL_K * temperature))
 end
 
-function sanchez_lacombe_ri0(chemical::ChemicalParameters)
+function sanchez_lacombe_ri0(chemical::SanchezLacombeParameters)
     # number of lattice cells occupied by a molecule of pure component i
     # MPa * g/mol / ((MPa * cm^3 /mol /K) * K * g/cm^33)
     ri0 = characteristic_pressure(chemical) * molecular_weight(chemical) / (R_MPA_CM3_K_MOL * characteristic_temperature(chemical) * characteristic_density(chemical))
     return ri0  
 end
 
-function sanchez_lacombe_pure_characteristic_volume(chemical::ChemicalParameters)
+function sanchez_lacombe_pure_characteristic_volume(chemical::SanchezLacombeParameters)
     # MPa L / K*Mol * K / MPa = L/Mol
     return R_MPA_L_K_MOL * characteristic_temperature(chemical) / characteristic_pressure(chemical)
 end
 
-function sanchez_lacombe_mixed_characteristic_temperature(components::AbstractVector{<:ChemicalParameters},  φ::AbstractVector{<:Number}, p_star)
+function sanchez_lacombe_mixed_characteristic_temperature(components::AbstractVector{<:SanchezLacombeParameters},  φ::AbstractVector{<:Number}, p_star)
     return p_star / sum(characteristic_pressure.(components) .* φ ./ characteristic_temperature.(components))
 end
 
-function sanchez_lacombe_Δpij(components::AbstractVector{<:ChemicalParameters}, kij)
+function sanchez_lacombe_Δpij(components::AbstractVector{<:SanchezLacombeParameters}, kij)
     p = characteristic_pressure.(components)
     return [p[idx] + p[jdx] - 2 * (1-kij[idx, jdx]) * sqrt(p[idx] * p[jdx]) for idx in eachindex(p), jdx in eachindex(p)]
 end
 
-function sanchez_lacombe_mixed_characteristic_pressure(components::AbstractVector{<:ChemicalParameters}, φ::AbstractVector{<:Number}, kij)
+function sanchez_lacombe_mixed_characteristic_pressure(components::AbstractVector{<:SanchezLacombeParameters}, φ::AbstractVector{<:Number}, kij)
     p = characteristic_pressure.(components)
     p★ = 0
     interaction_effects = 0
@@ -245,13 +171,13 @@ function sanchez_lacombe_mixed_characteristic_pressure(components::AbstractVecto
     return p★ - 0.5 * interaction_effects
 end
 
-function sanchez_lacombe_mixed_characteristic_density(components::AbstractVector{<:ChemicalParameters}, mass_fractions::AbstractVector{<:Number})
+function sanchez_lacombe_mixed_characteristic_density(components::AbstractVector{<:SanchezLacombeParameters}, mass_fractions::AbstractVector{<:Number})
     inverse_rho_star = sum(mass_fractions ./ characteristic_density.(components)) # 1 / (g/cm^3)
     mixed_char_dens = 1 / inverse_rho_star
     return mixed_char_dens  
 end
 
-function sanchez_lacombe_close_packed_volume_fractions(components::AbstractVector{<:ChemicalParameters}, mass_fractions::AbstractVector{<:Number})
+function sanchez_lacombe_close_packed_volume_fractions(components::AbstractVector{<:SanchezLacombeParameters}, mass_fractions::AbstractVector{<:Number})
     mass_frac_over_char_dens = mass_fractions ./ characteristic_density.(components)
     return mass_frac_over_char_dens ./ sum(mass_frac_over_char_dens)
 end  
@@ -272,13 +198,13 @@ struct SanchezLacombeModel{CPT, KIJ_T, N, L}
     components::SVector{N, CPT}
     kij::SMatrix{N, N, KIJ_T, L}
 end
-function SanchezLacombeModel(components::Vector{<:ChemicalParameters}, kij::Matrix{<:Number})
+function SanchezLacombeModel(components::Vector{<:SanchezLacombeParameters}, kij::Matrix{<:Number})
     n = length(components)
     _kij = SMatrix{n, n}(kij)
     _components = SVector{n}(components)
     return SanchezLacombeModel(_components, _kij)
 end
-function SanchezLacombeModel(components::AbstractVector{<:ChemicalParameters})
+function SanchezLacombeModel(components::AbstractVector{<:SanchezLacombeParameters})
     return SanchezLacombeModel(components, initmatrix(components))
 end
 function SanchezLacombeModel(components::AbstractVector{<:String})
