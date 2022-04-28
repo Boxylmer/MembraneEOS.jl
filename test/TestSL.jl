@@ -59,4 +59,5 @@
     @test density_upper_bound(co2_ch4_model, [1.0, 0.0]) ≈ MembraneEOS.characteristic_density(MembraneEOS.ChemicalParameters("CO2"))
     @test density_upper_bound(co2_ch4_model, [0.5, 0.5]) ≈ 0.7518610421836229  # will change if char. params. are updated
     @test density_upper_bound(co2_ch4_model, [0.0, 1.0]) ≈ MembraneEOS.characteristic_density(MembraneEOS.ChemicalParameters("CH4"))
+
 end

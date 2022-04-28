@@ -48,7 +48,6 @@ function Clapeyron.mix_vε(model::Clapeyron.SL,V,T,z,mix::SLKRule2,r̄,Σz = sum
     end
 
     p★ = p★_ideal - 0.5 * interaction_effects   # square of the Hildebrand Solubility Parameter and cohesive energy density
-    @show p★ * 1e-6 # mpa
     t = ε ./ Clapeyron.R̄   # J/mol / (m2 kg s-2 K-1 mol-1 = J/(molK))  --> K
     t★ = p★ / sum(p .* ϕ ./ t)  # Pa / (Pa/K) --> K
 
