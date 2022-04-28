@@ -30,7 +30,8 @@ function Clapeyron.a_res(model::Clapeyron.SanchezLacombe,V,T,z=SA[1.0])
     r̄ = dot(z,r)
     r̄ = r̄/Σz
     v_r,ε_r = Clapeyron.mix_vε(model,V,T,z,mixing,r̄,Σz)
-    @show v_r, ε_r 
+    v_r, ε_r 
+    @show p★ = ε_r / v_r * 1e-6  # MPa 
     v = V/Σz
     ρ̃ = r̄*v_r/v
     T̃ = Clapeyron.R̄*T/ε_r
@@ -109,7 +110,7 @@ function SL(p★::AbstractVector, t★::AbstractVector, ρ★::AbstractVector, m
     r = SingleParam("segment", components, _r)
     mwparam = SingleParam("Mw", components, mw)
     kij = PairParam("kij", components, kij .* 1.0)
-    mixing = Clapeyron.SLKRule2(components, kij)
+    mixing = MembraneEOS.SLKRule2(components, kij)
     ideal = Clapeyron.init_model(Clapeyron.BasicIdeal, components, String[], false)
     premixed_vol, premixed_epsilon = Clapeyron.sl_mix(v★, ε, mixing)
     # mixing_new = MembraneEOS.SLKRule2(components, kij)
