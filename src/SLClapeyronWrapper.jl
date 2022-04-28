@@ -35,6 +35,7 @@ function Clapeyron.mix_vε(model::Clapeyron.SL,V,T,z,mix::SLKRule2,r̄,Σz = sum
     # get the characteristic pressures first
 
     p = ε ./ v  # J/mol  /  m^3/mol  -> J/m^3 -> Pa*m^3 / m^3 -> Pa
+    p .* 1e-6 # MPa
     Δpij = [p[idx] + p[jdx] - 2 * (1-k[idx, jdx]) * sqrt(p[idx] * p[jdx]) for idx in eachindex(p), jdx in eachindex(p)]
     
     p★_ideal = 0
@@ -47,21 +48,15 @@ function Clapeyron.mix_vε(model::Clapeyron.SL,V,T,z,mix::SLKRule2,r̄,Σz = sum
     end
 
     p★ = p★_ideal - 0.5 * interaction_effects   # square of the Hildebrand Solubility Parameter and cohesive energy density
-    
-
-    # oh no, we need another mixed parameter to convert back...
-    # V* = RT*/P* and another one I forget. Can I get T* with what we have here?
-    
-    # t★ = p★ / sum([p .* ϕ ./ t])...  # oh my god we don't have t
-    # lets say we have the boltzmann constant in the units that makes this all work out nicely
-    t = ε ./ Clapeyron.R̄
-    t★ = p★ / sum(p .* ϕ ./ t)
+    @show p★ * 1e-6 # mpa
+    t = ε ./ Clapeyron.R̄   # J/mol / (m2 kg s-2 K-1 mol-1 = J/(molK))  --> K
+    t★ = p★ / sum(p .* ϕ ./ t)  # Pa / (Pa/K) --> K
 
     # yes!
 
     # whoops, lets also pretend we have R in the magically correct units as well
-    v★ = t★ * Clapeyron.R̄ / p★  # Average close-packed molar volume in the mixture (mixed characteristic volume)
-    ε★ = t★ * Clapeyron.R̄  # Non-bonded interaction energy between two lattice cells occupied by the "mixed component"
+    v★ = t★ * Clapeyron.R̄ / p★  # K * (m2 kg s-2 K-1 mol-1) / Pa = m2 kg s-2 mol-1 * kg-1 m s2 = m3 / mol
+    ε★ = t★ * Clapeyron.R̄  # K * J / (mol K) = J/mol
     return v★,ε★   # units: m^3/mol, J/mol 
 end
 
@@ -84,7 +79,6 @@ SL(p★::Number, t★::Number, ρ★::Number, mw::Number) = SL([p★], [t★], [
 function SL(p★::AbstractVector, t★::AbstractVector, ρ★::AbstractVector, mw::AbstractVector, kij = zeros(length(mw),length(mw)))
     R = Clapeyron.R̄  # cm3*mpa / kmol
     icomponents = 1:length(p★)
-    n = length(icomponents)
     components = [string(i) for i in icomponents]
     _v★ = R .* t★./p★ .* 1e-6 #m3/mol
     _ε = p★ .* _v★ .* 1e6  # cm3 * MPa / mol -> J/mol
@@ -94,8 +88,6 @@ function SL(p★::AbstractVector, t★::AbstractVector, ρ★::AbstractVector, m
     r = SingleParam("segment", components, _r)
     mwparam = SingleParam("Mw", components, mw)
     kij = PairParam("kij", components, kij .* 1.0)
-    # k1ij =  PairParam("k1", components, zeros(Float64, n, n))
-    # lij =  PairParam("l", components, zeros(Float64, n, n))
     mixing = MembraneEOS.SLKRule2(components, kij)
     ideal = Clapeyron.init_model(Clapeyron.BasicIdeal, components, String[], false)
     premixed_vol, premixed_epsilon = Clapeyron.sl_mix(v★, ε, mixing)

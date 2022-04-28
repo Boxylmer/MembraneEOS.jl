@@ -55,7 +55,6 @@
     @test a_pt_res ≈ ρTω_a_res
     @test μ_pt_res ≈ μ_ρtω_res
 
-
     # density upper bounds
     @test density_upper_bound(co2_ch4_model, [1.0, 0.0]) ≈ MembraneEOS.characteristic_density(MembraneEOS.ChemicalParameters("CO2"))
     @test density_upper_bound(co2_ch4_model, [0.5, 0.5]) ≈ 0.7518610421836229  # will change if char. params. are updated
