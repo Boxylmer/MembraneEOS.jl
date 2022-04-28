@@ -16,11 +16,26 @@ struct SLKRule2 <: Clapeyron.SLMixingRule
 end
 
 
-function Clapeyron.sl_mix(unmixed_vol,unmixed_epsilon,mixmodel::SLKRule2)
+function Clapeyron.sl_mix(unmixed_vol,unmixed_epsilon, mixmodel::SLKRule2)
     #dont mind the function names, it performs the correct mixing
     premixed_vol = Clapeyron.epsilon_LorentzBerthelot(unmixed_vol)
     premixed_epsilon = Clapeyron.sigma_LorentzBerthelot(unmixed_epsilon)
     return premixed_vol, premixed_epsilon
+end
+
+function Clapeyron.a_res(model::Clapeyron.SanchezLacombe,V,T,z=SA[1.0])
+    Σz = sum(z)     
+    r = model.params.segment.values
+    mixing = model.mixing
+    r̄ = dot(z,r)
+    r̄ = r̄/Σz
+    v_r,ε_r = Clapeyron.mix_vε(model,V,T,z,mixing,r̄,Σz)
+    @show v_r, ε_r 
+    v = V/Σz
+    ρ̃ = r̄*v_r/v
+    T̃ = Clapeyron.R̄*T/ε_r
+    _1 = one(V+T+first(z))
+    return r̄*(-ρ̃ /T̃ + (_1/ρ̃  - _1)*log1p(-ρ̃ )+_1)
 end
 
 function Clapeyron.mix_vε(model::Clapeyron.SL,V,T,z,mix::SLKRule2,r̄,Σz = sum(z)) 
@@ -94,9 +109,11 @@ function SL(p★::AbstractVector, t★::AbstractVector, ρ★::AbstractVector, m
     r = SingleParam("segment", components, _r)
     mwparam = SingleParam("Mw", components, mw)
     kij = PairParam("kij", components, kij .* 1.0)
-    mixing = MembraneEOS.SLKRule2(components, kij)
+    mixing = Clapeyron.SLKRule(components, kij)
     ideal = Clapeyron.init_model(Clapeyron.BasicIdeal, components, String[], false)
     premixed_vol, premixed_epsilon = Clapeyron.sl_mix(v★, ε, mixing)
+    # mixing_new = MembraneEOS.SLKRule2(components, kij)
+    # @show premixed_vol_new, premixed_epsilon_new = Clapeyron.sl_mix(v★, ε, mixing_new)
     packagedparams = Clapeyron.SanchezLacombeParam(mwparam, r, premixed_epsilon, premixed_vol)
     return Clapeyron.SL(components, icomponents, mixing, packagedparams, ideal, String[])
 end
