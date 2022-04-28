@@ -31,29 +31,36 @@ function Clapeyron.mix_vε(model::Clapeyron.SL,V,T,z,mix::SLKRule2,r̄,Σz = sum
     k = mix.k.values   # unitless
     r̄inv = one(r̄)/r̄
     ϕ = @. r* z* r̄inv/Σz   # unitless
-
-    # get the characteristic pressures first
-
     p = ε ./ v  # J/mol  /  m^3/mol  -> J/m^3 -> Pa*m^3 / m^3 -> Pa
-    p .* 1e-6 # MPa
     Δpij = [p[idx] + p[jdx] - 2 * (1-k[idx, jdx]) * sqrt(p[idx] * p[jdx]) for idx in eachindex(p), jdx in eachindex(p)]
     
-    p★_ideal = 0
-    for idx in eachindex(p, ϕ)
-        p★_ideal += ϕ[idx] * p[idx]
-    end
-    interaction_effects = 0
-    for idx in eachindex(p, ϕ), jdx in eachindex(p, ϕ)
-        interaction_effects += ϕ[idx] * ϕ[jdx] * Δpij[idx, jdx]
+    # p★_ideal = 0
+    # for idx in eachindex(p, ϕ)
+    #     p★_ideal += ϕ[idx] * p[idx]
+    # end
+    # interaction_effects = 0
+    # for idx in eachindex(p, ϕ), jdx in eachindex(p, ϕ)
+    #     interaction_effects += ϕ[idx] * ϕ[jdx] * Δpij[idx, jdx]
+    # end
+
+    # p★ = p★_ideal - 0.5 * interaction_effects   # square of the Hildebrand Solubility Parameter and cohesive energy density
+
+
+    p★ = zero(eltype(z))
+    for i in 1:length(z)
+        ϕi = ϕ[i]
+        p_i = p[i]
+        p★ += ϕ[i]*p[i]
+        for j in 1:i-1 # i != j
+            p_j = p[j]
+            ϕj = ϕ[j]
+            Δpij = p_i + p_j - 2*(1 - k[i,j])*sqrt(p_i*p_j)
+            p★ -= ϕi*ϕj*Δpij #0.5*2
+        end
     end
 
-    p★ = p★_ideal - 0.5 * interaction_effects   # square of the Hildebrand Solubility Parameter and cohesive energy density
     t = ε ./ Clapeyron.R̄   # J/mol / (m2 kg s-2 K-1 mol-1 = J/(molK))  --> K
     t★ = p★ / sum(p .* ϕ ./ t)  # Pa / (Pa/K) --> K
-
-    # yes!
-
-    # whoops, lets also pretend we have R in the magically correct units as well
     v★ = t★ * Clapeyron.R̄ / p★  # K * (m2 kg s-2 K-1 mol-1) / Pa = m2 kg s-2 mol-1 * kg-1 m s2 = m3 / mol
     ε★ = t★ * Clapeyron.R̄  # K * J / (mol K) = J/mol
     return v★,ε★   # units: m^3/mol, J/mol 
