@@ -129,7 +129,7 @@ function SL(p★::AbstractVector, t★::AbstractVector, ρ★::AbstractVector, m
     r = SingleParam("segment", components, _r)
     mwparam = SingleParam("Mw", components, mw)
     kij = PairParam("kij", components, kij .* 1.0)
-    mixing = MembraneEOS.SLKRule2(components, kij)
+    mixing = Clapeyron.SLKRule(components, kij)
     ideal = Clapeyron.init_model(Clapeyron.BasicIdeal, components, String[], false)
     premixed_vol, premixed_epsilon = Clapeyron.sl_mix(v★, ε, mixing)
     # mixing_new = MembraneEOS.SLKRule2(components, kij)
