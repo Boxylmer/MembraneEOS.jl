@@ -31,7 +31,7 @@ function Clapeyron.a_res(model::Clapeyron.SanchezLacombe,V,T,z=SA[1.0])
     r̄ = r̄/Σz
     v_r,ε_r = Clapeyron.mix_vε(model,V,T,z,mixing,r̄,Σz)
     v_r, ε_r 
-    @show p★ = ε_r / v_r * 1e-6  # MPa 
+    # @show p★ = ε_r / v_r * 1e-6  # MPa 
     v = V/Σz
     ρ̃ = r̄*v_r/v
     T̃ = Clapeyron.R̄*T/ε_r

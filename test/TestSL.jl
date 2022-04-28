@@ -60,4 +60,13 @@
     @test density_upper_bound(co2_ch4_model, [0.5, 0.5]) ≈ 0.7518610421836229  # will change if char. params. are updated
     @test density_upper_bound(co2_ch4_model, [0.0, 1.0]) ≈ MembraneEOS.characteristic_density(MembraneEOS.ChemicalParameters("CH4"))
 
+    # very nonideal phase
+    model_very_nonideal = MembraneEOS.SL([300.0, 630.0], [400.0, 300.0], [1.101, 1.515], [16.0, 4400000.0], [0 -0.1; -0.1 0])
+    p = 1  # mpa
+    t = 298.15  # k
+    z = [1., 0.]
+    @show v = volume(model_very_nonideal, p, t, z)  # l/mol
+    @show μ = VT_chemical_potential(model_very_nonideal, v, t, z)
+    @show ρ = mass_density(model_very_nonideal, p, t, z)  # g/cm3
+
 end
