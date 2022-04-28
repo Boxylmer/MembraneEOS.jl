@@ -73,7 +73,7 @@ function Clapeyron.mix_vε(model::Clapeyron.SL,V,T,z,mix::SLKRule2,r̄,Σz = sum
     r̄inv = one(r̄)/r̄
     ϕ = @. r* z* r̄inv/Σz   # unitless
     p = ε ./ v  # J/mol  /  m^3/mol  -> J/m^3 -> Pa*m^3 / m^3 -> Pa
-    Δpij = [p[idx] + p[jdx] - 2 * (1-k[idx, jdx]) * sqrt(p[idx] * p[jdx]) for idx in eachindex(p), jdx in eachindex(p)]
+    # Δpij = [p[idx] + p[jdx] - 2 * (1-k[idx, jdx]) * sqrt(p[idx] * p[jdx]) for idx in eachindex(p), jdx in eachindex(p)]
 
     p★ = zero(eltype(z))
     for i in 1:length(z)
@@ -84,7 +84,7 @@ function Clapeyron.mix_vε(model::Clapeyron.SL,V,T,z,mix::SLKRule2,r̄,Σz = sum
             p_j = p[j]
             ϕj = ϕ[j]
             Δpij = p_i + p_j - 2*(1 - k[i,j])*sqrt(p_i*p_j)
-            p★ -= sqrt(ϕi*ϕj)*Δpij #0.5*2
+            p★ -= ϕi*ϕj*Δpij #0.5*2
         end
     end
 
