@@ -8,6 +8,66 @@ function get_kij_matrix(::SanchezLacombe, components::AbstractVector{<:String})
     return get_kij_matrix(SLKijLookup, components)
 end 
 
+### things for new SL mixing rule
+
+struct SLKRule2 <: Clapeyron.SLMixingRule
+    components::Vector{String}
+    k::PairParam{Float64}
+end
+
+
+function Clapeyron.sl_mix(unmixed_vol,unmixed_epsilon,mixmodel::SLKRule2)
+    #dont mind the function names, it performs the correct mixing
+    premixed_vol = Clapeyron.epsilon_LorentzBerthelot(unmixed_vol)
+    premixed_epsilon = Clapeyron.sigma_LorentzBerthelot(unmixed_epsilon)
+    return premixed_vol, premixed_epsilon
+end
+
+function Clapeyron.mix_vε(model::Clapeyron.SL,V,T,z,mix::SLKRule2,r̄,Σz = sum(z)) 
+    v = model.params.vol.diagvalues  # m^3/mol
+    ε = model.params.epsilon.diagvalues  # J/mol 
+    isone(length(z)) && return (only(v),only(ε))
+    r =  model.params.segment.values  # unitless
+    k = mix.k.values   # unitless
+    r̄inv = one(r̄)/r̄
+    ϕ = @. r* z* r̄inv/Σz   # unitless
+
+    # get the characteristic pressures first
+
+    p = ε ./ v  # J/mol  /  m^3/mol  -> J/m^3 -> Pa*m^3 / m^3 -> Pa
+    Δpij = [p[idx] + p[jdx] - 2 * (1-k[idx, jdx]) * sqrt(p[idx] * p[jdx]) for idx in eachindex(p), jdx in eachindex(p)]
+    
+    p★_ideal = 0
+    for idx in eachindex(p, ϕ)
+        p★_ideal += ϕ[idx] * p[idx]
+    end
+    interaction_effects = 0
+    for idx in eachindex(p, ϕ), jdx in eachindex(p, ϕ)
+        interaction_effects += ϕ[idx] * ϕ[jdx] * Δpij[idx, jdx]
+    end
+
+    p★ = p★_ideal - 0.5 * interaction_effects   # square of the Hildebrand Solubility Parameter and cohesive energy density
+    
+
+    # oh no, we need another mixed parameter to convert back...
+    # V* = RT*/P* and another one I forget. Can I get T* with what we have here?
+    
+    # t★ = p★ / sum([p .* ϕ ./ t])...  # oh my god we don't have t
+    # lets say we have the boltzmann constant in the units that makes this all work out nicely
+    t = ε ./ Clapeyron.R̄
+    t★ = p★ / sum(p .* ϕ ./ t)
+
+    # yes!
+
+    # whoops, lets also pretend we have R in the magically correct units as well
+    v★ = t★ * Clapeyron.R̄ / p★  # Average close-packed molar volume in the mixture (mixed characteristic volume)
+    ε★ = t★ * Clapeyron.R̄  # Non-bonded interaction energy between two lattice cells occupied by the "mixed component"
+    return v★,ε★   # units: m^3/mol, J/mol 
+end
+
+### end of things for new SL mixing rule 
+
+
 SL(component::String) = SL([component])
 function SL(components::AbstractVector, KIJ_matrix = nothing)
     if isnothing(KIJ_matrix)
@@ -36,7 +96,7 @@ function SL(p★::AbstractVector, t★::AbstractVector, ρ★::AbstractVector, m
     kij = PairParam("kij", components, kij .* 1.0)
     # k1ij =  PairParam("k1", components, zeros(Float64, n, n))
     # lij =  PairParam("l", components, zeros(Float64, n, n))
-    mixing = Clapeyron.SLKRule(components, kij)
+    mixing = MembraneEOS.SLKRule2(components, kij)
     ideal = Clapeyron.init_model(Clapeyron.BasicIdeal, components, String[], false)
     premixed_vol, premixed_epsilon = Clapeyron.sl_mix(v★, ε, mixing)
     packagedparams = Clapeyron.SanchezLacombeParam(mwparam, r, premixed_epsilon, premixed_vol)
