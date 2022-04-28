@@ -59,7 +59,8 @@ function Clapeyron.a_res(model::Clapeyron.SanchezLacombe,V,T,z=SA[1.0])
         ϕi = r[i]*z[i]*r̄inv/Σz
         summation_of_volfracs += Clapeyron.xlogx(ϕi)/r[i]
     end
-    result = r̄*(-ρ̃  + T̃*((1/ρ̃ -1)*log1p(-ρ̃ )+1/r̄*log(ρ̃ ) + summation_of_volfracs))
+    # result = r̄*(-ρ̃  + T̃*((1/ρ̃ -1)*log1p(-ρ̃ )+1/r̄*log(ρ̃ ) + summation_of_volfracs))
+    result = r̄*(-ρ̃  + T̃*((1/ρ̃ -1)*log1p(-ρ̃ )+1/r̄*log(ρ̃ ) + summation_of_volfracs))/T̃
     return result
 end
 
