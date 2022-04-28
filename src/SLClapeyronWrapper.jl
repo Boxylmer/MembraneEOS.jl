@@ -90,7 +90,9 @@ function Clapeyron.mix_vε(model::Clapeyron.SL,V,T,z,mix::SLKRule2,r̄,Σz = sum
 
     t = ε ./ Clapeyron.R̄   # J/mol / (m2 kg s-2 K-1 mol-1 = J/(molK))  --> K
     t★ = p★ / sum(p .* ϕ ./ t)  # Pa / (Pa/K) --> K
-    v★ = t★ * Clapeyron.R̄ / p★  # K * (m2 kg s-2 K-1 mol-1) / Pa = m2 kg s-2 mol-1 * kg-1 m s2 = m3 / mol
+    @show v★ = t★ * Clapeyron.R̄ / p★  # K * (m2 kg s-2 K-1 mol-1) / Pa = m2 kg s-2 mol-1 * kg-1 m s2 = m3 / mol
+    @show v★ = dot(z,model.params.vol.diagvalues)/sum(z)
+    @show " " # need space
     ε★ = t★ * Clapeyron.R̄  # K * J / (mol K) = J/mol
     return v★,ε★   # units: m^3/mol, J/mol 
 end
