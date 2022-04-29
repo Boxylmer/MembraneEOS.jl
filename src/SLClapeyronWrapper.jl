@@ -23,30 +23,30 @@ function Clapeyron.sl_mix(unmixed_vol,unmixed_epsilon, mixmodel::SLKRule2)
     return premixed_vol, premixed_epsilon
 end
 
-# function Clapeyron.a_res(model::Clapeyron.SanchezLacombe,V,T,z=SA[1.0])
-#     #configurational version
-#     Σz = sum(z)     
-#     r = model.params.segment.values
-#     mixing = model.mixing
-#     r̄ = dot(z,r)
-#     r̄ = r̄/Σz
-#     v_r, ε_r = Clapeyron.mix_vε(model,V,T,z,mixing,r̄,Σz)
-#     v = V/Σz
-#     ρ̃ = r̄*v_r/v
-#     T̃ = Clapeyron.R̄*T/ε_r
-#     _1 = one(V+T+first(z))
-#     # @show r̄*(-ρ̃ /T̃ + (_1/ρ̃  - _1)*log1p(-ρ̃ )+_1)
-#     r̄inv = one(r̄)/r̄
-#     # ϕ = @. r* z* r̄inv/Σz
-#     summation_of_volfracs = zero(_1)
-#     for i in 1:length(z)
-#         ϕi = r[i]*z[i]*r̄inv/Σz
-#         summation_of_volfracs += Clapeyron.xlogx(ϕi)/r[i]
-#     end
-#     # result = r̄*(-ρ̃  + T̃*((1/ρ̃ -1)*log1p(-ρ̃ )+1/r̄*log(ρ̃ ) + summation_of_volfracs))
-#     result = r̄*(-ρ̃  + T̃*((1/ρ̃ -1)*log1p(-ρ̃ )+1/r̄*log(ρ̃ ) + summation_of_volfracs))/T̃
-#     return result
-# end
+function Clapeyron.a_res(model::Clapeyron.SanchezLacombe,V,T,z=SA[1.0])
+    #configurational version
+    Σz = sum(z)     
+    r = model.params.segment.values
+    mixing = model.mixing
+    r̄ = dot(z,r)
+    r̄ = r̄/Σz
+    v_r, ε_r = Clapeyron.mix_vε(model,V,T,z,mixing,r̄,Σz)
+    v = V/Σz
+    ρ̃ = r̄*v_r/v
+    T̃ = Clapeyron.R̄*T/ε_r
+    _1 = one(V+T+first(z))
+    # @show r̄*(-ρ̃ /T̃ + (_1/ρ̃  - _1)*log1p(-ρ̃ )+_1)
+    r̄inv = one(r̄)/r̄
+    # ϕ = @. r* z* r̄inv/Σz
+    summation_of_volfracs = zero(_1)
+    for i in 1:length(z)
+        ϕi = r[i]*z[i]*r̄inv/Σz
+        summation_of_volfracs += Clapeyron.xlogx(ϕi)/r[i]
+    end
+    # result = r̄*(-ρ̃  + T̃*((1/ρ̃ -1)*log1p(-ρ̃ )+1/r̄*log(ρ̃ ) + summation_of_volfracs))
+    result = r̄*(-ρ̃  + T̃*((1/ρ̃ -1)*log1p(-ρ̃ )+1/r̄*log(ρ̃ ) + summation_of_volfracs))/T̃
+    return result
+end
 
 # function Clapeyron.mix_vε(model::Clapeyron.SL,V,T,z,mix::SLKRule2,r̄,Σz = sum(z)) 
 #     v = model.params.vol.diagvalues  # m^3/mol
