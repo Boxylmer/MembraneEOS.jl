@@ -6,6 +6,7 @@ module MembraneEOS
     using Clapeyron: SingleParam, PairParam
     using StaticArrays
     using LinearAlgebra
+    using Roots
 
     # using Measurements  # causes stack overflow errors somehow??
     function initmatrix(components::AbstractVector; initial_value = 0.0)
@@ -19,7 +20,7 @@ module MembraneEOS
     export CubicParameters
     export CubicModel
     
-    include(joinpath("SLClapeyronWrapper.jl"))
+    include(joinpath("deprecated", "SanchezLacombe.jl"))
     export SL
 
     # shared methods

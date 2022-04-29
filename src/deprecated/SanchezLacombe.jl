@@ -1,5 +1,14 @@
 struct SanchezLacombe end
 
+function get_kij(::SanchezLacombe, component_1::String, component_2::String)
+    if component_1 == component_2 return 0.0 end
+    return get_kij(SLKijLookup, component_1, component_2) 
+end
+function get_kij_matrix(::SanchezLacombe, components::AbstractVector{<:String})
+    return get_kij_matrix(SLKijLookup, components)
+end 
+
+
 struct SanchezLacombeParameters{CPT, CTT, CDT, MWT}
     characteristic_pressure_mpa::CPT
     characteristic_temperature_k::CTT
@@ -11,6 +20,31 @@ characteristic_pressure(slp::SanchezLacombeParameters) = slp.characteristic_pres
 characteristic_temperature(slp::SanchezLacombeParameters) = slp.characteristic_temperature_k
 characteristic_density(slp::SanchezLacombeParameters) = slp.characteristic_density_g_cm3
 molecular_weight(slp::SanchezLacombeParameters) = slp.molecular_weight
+
+
+struct SanchezLacombeModel{CPT, KIJ_T}
+    components::CPT
+    kij::KIJ_T
+end
+
+
+SL(component::String) = SL([component])
+function SL(components::AbstractVector{<:String}, KIJ_matrix = nothing)
+    if isnothing(KIJ_matrix)
+        KIJ_matrix = get_kij_matrix(SanchezLacombe(), components)
+    end
+    component_parameters = ChemicalParameters(components)
+    t★ = characteristic_temperature.(component_parameters)
+    p★ = characteristic_pressure.(component_parameters)
+    ρ★ = characteristic_density.(component_parameters)
+    mw = Vector{Float64}(molecular_weight.(component_parameters))
+    return SL(p★, t★, ρ★, mw, KIJ_matrix)
+end
+SL(p★::Number, t★::Number, ρ★::Number, mw::Number) = SL([p★], [t★], [ρ★], [mw])
+function SL(p★::AbstractVector, t★::AbstractVector, ρ★::AbstractVector, mw::AbstractVector, kij = zeros(length(mw),length(mw)))
+    components = SanchezLacombeParameters.(p★, t★, ρ★, mw)
+    return SanchezLacombeModel(components, kij)
+end
 
 
 # core math functions
@@ -93,8 +127,8 @@ function sanchez_lacombe_chemical_potentials(components::AbstractVector{<:Sanche
     term_1 = log.(reduced_density .* φ)
     term_2 = -log(1 - reduced_density) .* (r_i0 .+ (r_i .- r_i0) ./ reduced_density)
     term_3 = -r_i .+ 1
-    term_4 = -reduced_density .* r_i0 .* (pure_characteristic_volume_i .* (p★i .+ summation_terms)) ./ (R_MPA_L_K_MOL * temperature) 
-    result = (term_1 .+ term_2 .+ term_3 .+ term_4) * R_J_MOL_K * temperature
+    term_4 = -reduced_density .* r_i0 .* (pure_characteristic_volume_i .* (p★i .+ summation_terms)) ./ (MembraneBase.R_MPA_L_K_MOL * temperature) 
+    result = (term_1 .+ term_2 .+ term_3 .+ term_4) * MembraneBase.R_J_MOL_K * temperature
     # result = sanchez_lacombe_chemical_potentials(
     #     sanchez_lacombe_activities(components, kij, φ, r_i0, r_i, pure_characteristic_volume_i, reduced_density, temperature),
     #     temperature)
@@ -102,11 +136,11 @@ function sanchez_lacombe_chemical_potentials(components::AbstractVector{<:Sanche
 end
 
 function sanchez_lacombe_chemical_potentials(activities::AbstractVector{<:Number}, temperature::Number)
-    return log.(activities) * R_J_MOL_K * temperature
+    return log.(activities) * MembraneBase.R_J_MOL_K * temperature
 end
 
 function sanchez_lacombe_activities(chemical_potentials, temperature)
-    return exp.(chemical_potentials / (R_J_MOL_K * temperature)) 
+    return exp.(chemical_potentials / (MembraneBase.R_J_MOL_K * temperature)) 
 end
 
 function sanchez_lacombe_activities(components::AbstractVector{<:SanchezLacombeParameters}, kij, φ, r_i0, r_i, pure_characteristic_volume_i, reduced_density, temperature)
@@ -122,7 +156,7 @@ function sanchez_lacombe_activities(components::AbstractVector{<:SanchezLacombeP
     term_1 = reduced_density * φ
     term_2 = (1 - reduced_density) .^ -(r_i0 .+ (r_i .- r_i0) ./ reduced_density)
     term_3 = (-r_i) .+ 1
-    term_4 = -reduced_density .* r_i0 .* pure_characteristic_volume_i ./ (R_MPA_L_K_MOL * temperature) .* (p★ .+ summation_terms)
+    term_4 = -reduced_density .* r_i0 .* pure_characteristic_volume_i ./ (MembraneBase.R_MPA_L_K_MOL * temperature) .* (p★ .+ summation_terms)
     return (term_1 .* term_2 .* exp.(term_3 .+ term_4)) 
     
     # return exp.(sanchez_lacombe_chemical_potentials(components, kij, φ, r_i0, r_i, pure_characteristic_volume_i, reduced_density, temperature) / (R_J_MOL_K * temperature))
@@ -131,13 +165,13 @@ end
 function sanchez_lacombe_ri0(chemical::SanchezLacombeParameters)
     # number of lattice cells occupied by a molecule of pure component i
     # MPa * g/mol / ((MPa * cm^3 /mol /K) * K * g/cm^33)
-    ri0 = characteristic_pressure(chemical) * molecular_weight(chemical) / (R_MPA_CM3_K_MOL * characteristic_temperature(chemical) * characteristic_density(chemical))
+    ri0 = characteristic_pressure(chemical) * molecular_weight(chemical) / (MembraneBase.R_MPA_CM3_K_MOL * characteristic_temperature(chemical) * characteristic_density(chemical))
     return ri0  
 end
 
 function sanchez_lacombe_pure_characteristic_volume(chemical::SanchezLacombeParameters)
     # MPa L / K*Mol * K / MPa = L/Mol
-    return R_MPA_L_K_MOL * characteristic_temperature(chemical) / characteristic_pressure(chemical)
+    return MembraneBase.R_MPA_L_K_MOL * characteristic_temperature(chemical) / characteristic_pressure(chemical)
 end
 
 function sanchez_lacombe_mixed_characteristic_temperature(components::AbstractVector{<:SanchezLacombeParameters},  φ::AbstractVector{<:Number}, p_star)
@@ -166,8 +200,6 @@ function sanchez_lacombe_mixed_characteristic_pressure(components::AbstractVecto
     for idx in eachindex(p, φ), jdx in eachindex(p, φ)
         interaction_effects += φ[idx] * φ[jdx] * Δpij[idx, jdx]
     end
-
-
     return p★ - 0.5 * interaction_effects
 end
 
@@ -184,7 +216,7 @@ end
 
 function sanchez_lacombe_mixed_characteristic_volume(t_star::Number, p_star::Number)
     # L/mol
-    return t_star * R_MPA_L_K_MOL / p_star
+    return t_star * MembraneBase.R_MPA_L_K_MOL / p_star
 end
 
 function sanchez_lacombe_ri(ri0::Number, pure_characteristic_volume::Number, mixed_characteristic_volume::Number)
@@ -192,32 +224,6 @@ function sanchez_lacombe_ri(ri0::Number, pure_characteristic_volume::Number, mix
 end
 
 
-# stuff to eventually replace the EOS system above, but for now will exist concurrently until everything is moved over
-
-struct SanchezLacombeModel{CPT, KIJ_T, N, L}
-    components::SVector{N, CPT}
-    kij::SMatrix{N, N, KIJ_T, L}
-end
-function SanchezLacombeModel(components::Vector{<:SanchezLacombeParameters}, kij::Matrix{<:Number})
-    n = length(components)
-    _kij = SMatrix{n, n}(kij)
-    _components = SVector{n}(components)
-    return SanchezLacombeModel(_components, _kij)
-end
-function SanchezLacombeModel(components::AbstractVector{<:SanchezLacombeParameters})
-    return SanchezLacombeModel(components, initmatrix(components))
-end
-function SanchezLacombeModel(components::AbstractVector{<:String})
-    kij = get_kij_matrix(modeltype, components)
-    component_parameters = ChemicalParameters(components)
-    return SanchezLacombeModel(component_parameters, kij)
-end
-function SanchezLacombeModel(component::ChemicalParameters)
-    return SanchezLacombeModel([component])
-end
-function SanchezLacombeModel(component::String)
-    return SanchezLacombeModel([component])
-end
 # function compressibility_factor(model::SanchezLacombeModel, p, t, mole_fractions=[1])
 # end
 
