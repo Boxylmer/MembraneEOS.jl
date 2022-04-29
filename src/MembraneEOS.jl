@@ -20,7 +20,7 @@ module MembraneEOS
     export CubicParameters
     export CubicModel
     
-    include(joinpath("deprecated", "SanchezLacombe.jl"))
+    include(joinpath("SLClapeyronWrapper.jl"))
     export SL
 
     # shared methods
