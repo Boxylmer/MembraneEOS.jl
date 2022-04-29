@@ -251,6 +251,7 @@ function MembraneBase.pressure(model::SanchezLacombeModel, v, t, mole_fractions=
         return pressure_mpa
 end
 
+"Volume in L/mol"
 function volume(model::SanchezLacombeModel, p, t, mole_fractions=[1])
     mass_fractions = mole_fractions_to_mass_fractions(mole_fractions, molecular_weight.(model.components))
     molecular_weights = molecular_weight.(model.components)
