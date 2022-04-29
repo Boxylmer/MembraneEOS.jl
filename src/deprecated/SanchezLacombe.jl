@@ -46,6 +46,8 @@ function SL(p★::AbstractVector, t★::AbstractVector, ρ★::AbstractVector, m
     return SanchezLacombeModel(components, kij)
 end
 
+molecular_weight(model::SanchezLacombeModel) = molecular_weight.(model.components)
+
 
 # core math functions
 
