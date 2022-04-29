@@ -48,43 +48,43 @@ end
 #     return result
 # end
 
-# function Clapeyron.mix_vε(model::Clapeyron.SL,V,T,z,mix::SLKRule2,r̄,Σz = sum(z)) 
-#     v = model.params.vol.diagvalues  # m^3/mol
-#     ε = model.params.epsilon.diagvalues  # J/mol 
-#     isone(length(z)) && return (only(v),only(ε))
-#     r =  model.params.segment.values  # unitless
-#     k = mix.k.values   # unitless
-#     r̄inv = one(r̄)/r̄
-#     ϕ = @. r* z* r̄inv/Σz   # unitless
-#     p = ε ./ v  # J/mol  /  m^3/mol  -> J/m^3 -> Pa*m^3 / m^3 -> Pa
+function Clapeyron.mix_vε(model::Clapeyron.SL,V,T,z,mix::SLKRule2,r̄,Σz = sum(z)) 
+    v = model.params.vol.diagvalues  # m^3/mol
+    ε = model.params.epsilon.diagvalues  # J/mol 
+    isone(length(z)) && return (only(v),only(ε))
+    r =  model.params.segment.values  # unitless
+    k = mix.k.values   # unitless
+    r̄inv = one(r̄)/r̄
+    ϕ = @. r* z* r̄inv/Σz   # unitless
+    p = ε ./ v  # J/mol  /  m^3/mol  -> J/m^3 -> Pa*m^3 / m^3 -> Pa
     
-#     p★ = zero(eltype(z))
-#     for i in 1:length(z)
-#         ϕi = ϕ[i]
-#         p_i = p[i]
-#         p★ += ϕ[i]*p[i]
-#         for j in 1:i-1 # i != j
-#             p_j = p[j]
-#             ϕj = ϕ[j]
-#             Δpij = p_i + p_j - 2*(1 - k[i,j])*sqrt(p_i*p_j)
-#             p★ -= ϕi*ϕj*Δpij #0.5*2
-#         end
-#     end
-#     ω = mole_fractions_to_mass_fractions(z, molecular_weight(model))
-#     ρ = molecular_weight(model) ./ (r .* v)   # g/mol / (unitless * m^3/mol) -> g/m^3
-#     ρ★ = 1/sum(ω ./ ρ)  # g/m^3
-#     #somehow we get rho
-#     ρ_state = Clapeyron.VT_mass_density(model,V,T,z) * 1000 # kg/m^3  --> g/m^3???
-#     v★ = (ρ_state / ρ★) * V / r̄   # (g/m^3 / g/m^3) * m^3/mol / (no units)  --> m^3/mol
+    p★ = zero(eltype(z))
+    for i in 1:length(z)
+        ϕi = ϕ[i]
+        p_i = p[i]
+        p★ += ϕ[i]*p[i]
+        for j in 1:i-1 # i != j
+            p_j = p[j]
+            ϕj = ϕ[j]
+            Δpij = p_i + p_j - 2*(1 - k[i,j])*sqrt(p_i*p_j)
+            p★ -= ϕi*ϕj*Δpij #0.5*2
+        end
+    end
+    ω = mole_fractions_to_mass_fractions(z, molecular_weight(model))
+    ρ = molecular_weight(model) ./ (r .* v)   # g/mol / (unitless * m^3/mol) -> g/m^3
+    ρ★ = 1/sum(ω ./ ρ)  # g/m^3
+    #somehow we get rho
+    ρ_state = Clapeyron.VT_mass_density(model,V,T,z) * 1000 # kg/m^3  --> g/m^3???
+    v★ = (ρ_state / ρ★) * V / r̄   # (g/m^3 / g/m^3) * m^3/mol / (no units)  --> m^3/mol
 
-#     t = ε ./ Clapeyron.R̄   # J/mol / (m2 kg s-2 K-1 mol-1 = J/(molK))  --> K
-#     t★ = p★ / sum(p .* ϕ ./ t)  # Pa / (Pa/K) --> K
-#     # @show v★ = t★ * Clapeyron.R̄ / p★  # K * (m2 kg s-2 K-1 mol-1) / Pa = m2 kg s-2 mol-1 * kg-1 m s2 = m3 / mol
-#     # @show v★ = dot(z,model.params.vol.diagvalues)/sum(z)
-#     # @show " " # need space
-#     ε★ = t★ * Clapeyron.R̄  # K * J / (mol K) = J/mol
-#     return v★,ε★   # units: m^3/mol, J/mol 
-# end
+    t = ε ./ Clapeyron.R̄   # J/mol / (m2 kg s-2 K-1 mol-1 = J/(molK))  --> K
+    t★ = p★ / sum(p .* ϕ ./ t)  # Pa / (Pa/K) --> K
+    # @show v★ = t★ * Clapeyron.R̄ / p★  # K * (m2 kg s-2 K-1 mol-1) / Pa = m2 kg s-2 mol-1 * kg-1 m s2 = m3 / mol
+    # @show v★ = dot(z,model.params.vol.diagvalues)/sum(z)
+    # @show " " # need space
+    ε★ = t★ * Clapeyron.R̄  # K * J / (mol K) = J/mol
+    return v★,ε★   # units: m^3/mol, J/mol 
+end
 
 ### end of things for new SL mixing rule 
 
@@ -114,7 +114,7 @@ function SL(p★::AbstractVector, t★::AbstractVector, ρ★::AbstractVector, m
     r = SingleParam("segment", components, _r)
     mwparam = SingleParam("Mw", components, mw)
     kij = PairParam("kij", components, kij .* 1.0)
-    mixing = Clapeyron.SLKRule(components, kij)
+    mixing = MembraneEOS.SLKRule2(components, kij)
     ideal = Clapeyron.init_model(Clapeyron.BasicIdeal, components, String[], false)
     premixed_vol, premixed_epsilon = Clapeyron.sl_mix(v★, ε, mixing)
     # mixing_new = MembraneEOS.SLKRule2(components, kij)
