@@ -3,7 +3,7 @@
     test_lookup_model = SL(["CO2", "CH4"], [0 0; 0 0])
 
     model_pdms = MembraneEOS.SL([302.0], [476.0], [1.104], [1.00E+30])
-    # @show MembraneEOS.mass_density(model_pdms, 1, 273.15)
+    @show MembraneEOS.mass_density(model_pdms, 1, 273.15)
     # @show MembraneEOS.chemical_potential(model_pdms, 1, 273.15)
     # @show MembraneEOS.chemical_potential(model_co2, 1, 273.15, [0.0, 0.2])
     # @show MembraneEOS.chemical_potential(model_co2_pure, 1, 273.15)
@@ -19,8 +19,10 @@
     @test 1. ≈ pres
 
     μ_pure = chemical_potential(model_co2_pure, 1, 273.15)[1]
-    μ_psuedo_pure = chemical_potential(model_co2, 1, 273.15, [1, 0])[1]
-    @test μ_pure ≈ μ_psuedo_pure
+    @show "*****************"
+    @show μ_psuedo_pure = chemical_potential(model_co2, 1, 273.15, [1, 0])
+    @show "*****************"
+    @test μ_pure ≈ μ_psuedo_pure[1]
 
     # fug_co2 = fugacity(model_co2_pure, 1, 273.15)
     
@@ -37,15 +39,15 @@
     z = [0.2, 0.8]
     p = 1; t = 273.15
     ω = mole_fractions_to_mass_fractions(z, molecular_weight(co2_ch4_model))
-    # ρ = mass_density(co2_ch4_model, p, t, z)  # g/cm3
-    # v = volume(co2_ch4_model, p, t, z)  # l/mol
-    # μ_ρtω = ρTω_chemical_potential(co2_ch4_model, ρ, t, ω)
-    # μ = VT_chemical_potential(co2_ch4_model, v, t, z)
-    # @test μ ≈ μ_ρtω
+    ρ = mass_density(co2_ch4_model, p, t, z)  # g/cm3
+    v = volume(co2_ch4_model, p, t, z)  # l/mol
+    μ_ρtω = ρTω_chemical_potential(co2_ch4_model, ρ, t, ω)
+    μ = VT_chemical_potential(co2_ch4_model, v, t, z)
+    @test μ ≈ μ_ρtω
 
-    # a_ρTω = ρTω_activity(co2_ch4_model, ρ, t, ω)
+    a_ρTω = ρTω_activity(co2_ch4_model, ρ, t, ω)
     a = activity(co2_ch4_model, p, t, z)
-    # @test a_ρTω ≈ a 
+    @test a_ρTω ≈ a 
 
     # μ_ρtω_res = ρTω_chemical_potential_res(co2_ch4_model, ρ, t, ω)
     # ρTω_a_res = ρTω_activity_res(co2_ch4_model, ρ, t, ω)
@@ -66,7 +68,7 @@
     t = 298.15  # k
     z = [1., 0.]
     @show v = volume(model_very_nonideal, p, t, z)  # l/mol
-    # @show μ = VT_chemical_potential(model_very_nonideal, v, t, z)
-    # @show ρ = mass_density(model_very_nonideal, p, t, z)  # g/cm3
+    @show μ = VT_chemical_potential(model_very_nonideal, v, t, z)
+    @show ρ = mass_density(model_very_nonideal, p, t, z)  # g/cm3
 
 end

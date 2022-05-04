@@ -2,8 +2,8 @@ module MembraneEOS
     using MembraneBase
     using MembraneBase: R_ATM_L_K_MOL
     using CSV
-    import Clapeyron
-    using Clapeyron: SingleParam, PairParam
+    # import Clapeyron
+    # using Clapeyron: SingleParam, PairParam
     using StaticArrays
     using LinearAlgebra
     using Roots
@@ -20,8 +20,8 @@ module MembraneEOS
     export CubicParameters
     export CubicModel
     
-    include(joinpath("SLClapeyronWrapper.jl"))
-    # include(joinpath("deprecated", "SanchezLacombe.jl"))
+    # include(joinpath("SLClapeyronWrapper.jl"))
+    include(joinpath("deprecated", "SanchezLacombe.jl"))
     export SL
 
     # shared methods

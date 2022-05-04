@@ -52,7 +52,8 @@ molecular_weight(model::SanchezLacombeModel) = molecular_weight.(model.component
 # core math functions
 
 function sanchez_lacombe_reduced_pressure(reduced_temperature, reduced_density, φ, r_i)
-    return -reduced_temperature * (log(1-reduced_density) + (1 - sum(φ ./ r_i)) * reduced_density) - reduced_density^2
+    # return -reduced_temperature * (log(1-reduced_density) + (1 - sum(φ ./ r_i)) * reduced_density) - reduced_density^2
+    return -reduced_temperature * (log1p(-reduced_density) + (1 - sum(φ ./ r_i)) * reduced_density) - reduced_density^2
 end
 
 function sanchez_lacombe_reduced_density(components, kij, mole_fractions, temperature, reduced_temperature, reduced_pressure, φ, r_i0, r_i, pure_characteristic_volume_i; tol=1e-12, maxiters=1000)
@@ -72,6 +73,7 @@ function sanchez_lacombe_reduced_density(components, kij, mole_fractions, temper
     
     # todo remove this and return a default, see if tests pass)
     if length(reduced_densities) == 0  # roots couldn't do it quickly, we will have to iterate (this actually probably means the situation is not realistic, 
+        @warn "Sanchez Lacombe solver was unable to find a solution without iterating."
         iter = 0
         reduced_density = 0
         const_sum = 1 - sum(φ ./ r_i)
@@ -127,7 +129,8 @@ function sanchez_lacombe_chemical_potentials(components::AbstractVector{<:Sanche
     
     summation_terms = [sum([φ[jdx] * (p★i[jdx] - Δpij[idx, jdx]) for jdx in eachindex(φ, p★i)]) for idx in eachindex(φ, p★i)]
     term_1 = log.(reduced_density .* φ)
-    term_2 = -log(1 - reduced_density) .* (r_i0 .+ (r_i .- r_i0) ./ reduced_density)
+    # term_2 = -log(1 - reduced_density) .* (r_i0 .+ (r_i .- r_i0) ./ reduced_density)
+    term_2 = -log1p(-reduced_density) .* (r_i0 .+ (r_i .- r_i0) ./ reduced_density)
     term_3 = -r_i .+ 1
     term_4 = -reduced_density .* r_i0 .* (pure_characteristic_volume_i .* (p★i .+ summation_terms)) ./ (MembraneBase.R_MPA_L_K_MOL * temperature) 
     result = (term_1 .+ term_2 .+ term_3 .+ term_4) * MembraneBase.R_J_MOL_K * temperature
@@ -145,24 +148,24 @@ function sanchez_lacombe_activities(chemical_potentials, temperature)
     return exp.(chemical_potentials / (MembraneBase.R_J_MOL_K * temperature)) 
 end
 
-function sanchez_lacombe_activities(components::AbstractVector{<:SanchezLacombeParameters}, kij, φ, r_i0, r_i, pure_characteristic_volume_i, reduced_density, temperature)
-    # J/mol
-    if (1 - reduced_density) < 0; return zeros(length(components)); end
-    if (reduced_density) < 0; return zeros(length(components)); end
-    if minimum(φ) < 0; return zeros(length(components)); end
+# function sanchez_lacombe_activities(components::AbstractVector{<:SanchezLacombeParameters}, kij, φ, r_i0, r_i, pure_characteristic_volume_i, reduced_density, temperature)
+#     # J/mol
+#     if (1 - reduced_density) < 0; return zeros(length(components)); end
+#     if (reduced_density) < 0; return zeros(length(components)); end
+#     if minimum(φ) < 0; return zeros(length(components)); end
 
-    p★ = characteristic_pressure.(components)
-    Δpij = sanchez_lacombe_Δpij(components, kij)
+#     p★ = characteristic_pressure.(components)
+#     Δpij = sanchez_lacombe_Δpij(components, kij)
     
-    summation_terms = [sum([φ[jdx] * (p★[jdx] - Δpij[idx, jdx]) for jdx in eachindex(φ, p★)]) for idx in eachindex(φ, p★)]
-    term_1 = reduced_density * φ
-    term_2 = (1 - reduced_density) .^ -(r_i0 .+ (r_i .- r_i0) ./ reduced_density)
-    term_3 = (-r_i) .+ 1
-    term_4 = -reduced_density .* r_i0 .* pure_characteristic_volume_i ./ (MembraneBase.R_MPA_L_K_MOL * temperature) .* (p★ .+ summation_terms)
-    return (term_1 .* term_2 .* exp.(term_3 .+ term_4)) 
+#     summation_terms = [sum([φ[jdx] * (p★[jdx] - Δpij[idx, jdx]) for jdx in eachindex(φ, p★)]) for idx in eachindex(φ, p★)]
+#     term_1 = reduced_density * φ
+#     term_2 = (1 - reduced_density) .^ -(r_i0 .+ (r_i .- r_i0) ./ reduced_density)
+#     term_3 = (-r_i) .+ 1
+#     term_4 = -reduced_density .* r_i0 .* pure_characteristic_volume_i ./ (MembraneBase.R_MPA_L_K_MOL * temperature) .* (p★ .+ summation_terms)
+#     return (term_1 .* term_2 .* exp.(term_3 .+ term_4)) 
     
-    # return exp.(sanchez_lacombe_chemical_potentials(components, kij, φ, r_i0, r_i, pure_characteristic_volume_i, reduced_density, temperature) / (R_J_MOL_K * temperature))
-end
+#     # return exp.(sanchez_lacombe_chemical_potentials(components, kij, φ, r_i0, r_i, pure_characteristic_volume_i, reduced_density, temperature) / (R_J_MOL_K * temperature))
+# end
 
 function sanchez_lacombe_ri0(chemical::SanchezLacombeParameters)
     # number of lattice cells occupied by a molecule of pure component i
@@ -253,8 +256,28 @@ end
 
 "Volume in L/mol"
 function volume(model::SanchezLacombeModel, p, t, mole_fractions=[1])
-    mass_fractions = mole_fractions_to_mass_fractions(mole_fractions, molecular_weight.(model.components))
+    # mass_fractions = mole_fractions_to_mass_fractions(mole_fractions, molecular_weight.(model.components))
+    # mixed_characteristic_density = sanchez_lacombe_mixed_characteristic_density(model.components, mass_fractions)
+    # φ = sanchez_lacombe_close_packed_volume_fractions(model.components, mass_fractions)
+    # r_i0 = sanchez_lacombe_ri0.(model.components)
+    # pure_characteristic_volume_i = sanchez_lacombe_pure_characteristic_volume.(model.components)
+    # p★ = sanchez_lacombe_mixed_characteristic_pressure(model.components, φ, model.kij)
+    # t★ = sanchez_lacombe_mixed_characteristic_temperature(model.components, φ, p★)
+    # v★ = sanchez_lacombe_mixed_characteristic_volume(t★, p★)
+    # r_i = sanchez_lacombe_ri.(r_i0, pure_characteristic_volume_i, v★)
+    # reduced_temperature = t / t★
+    # reduced_pressure = p / p★
+    # reduced_density = sanchez_lacombe_reduced_density(model.components, model.kij, mole_fractions, t, reduced_temperature, reduced_pressure, φ, r_i0, r_i, pure_characteristic_volume_i)
+    # density_g_cm3 = reduced_density * mixed_characteristic_density
+    density_g_cm3 = mass_density(model, p, t, mole_fractions)
     molecular_weights = molecular_weight.(model.components)
+    volume = density_to_molar_volume(density_g_cm3, mole_fractions, molecular_weights)
+    return volume
+end
+
+"Density in g/cm^3"
+function mass_density(model::SanchezLacombeModel, p, t, mole_fractions=[1])
+    mass_fractions = mole_fractions_to_mass_fractions(mole_fractions, molecular_weight.(model.components))
     mixed_characteristic_density = sanchez_lacombe_mixed_characteristic_density(model.components, mass_fractions)
     φ = sanchez_lacombe_close_packed_volume_fractions(model.components, mass_fractions)
     r_i0 = sanchez_lacombe_ri0.(model.components)
@@ -267,11 +290,8 @@ function volume(model::SanchezLacombeModel, p, t, mole_fractions=[1])
     reduced_pressure = p / p★
     reduced_density = sanchez_lacombe_reduced_density(model.components, model.kij, mole_fractions, t, reduced_temperature, reduced_pressure, φ, r_i0, r_i, pure_characteristic_volume_i)
     density_g_cm3 = reduced_density * mixed_characteristic_density
-    volume = density_to_molar_volume(density_g_cm3, mole_fractions, molecular_weights)
-    return volume
+    return density_g_cm3
 end
-
-# function density(model::)
 
 # function fugacity(model::SanchezLacombeModel, p, t, mole_fractions=[1])
 # end
