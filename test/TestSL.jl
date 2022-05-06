@@ -18,10 +18,8 @@
     pres = pressure(model_co2, vol, 273.15, [0.5, 0.5])
     @test 1. ≈ pres
 
-    μ_pure = chemical_potential(model_co2_pure, 1, 273.15)[1]
-    @show "*****************"
+    @show μ_pure = chemical_potential(model_co2_pure, 1, 273.15)[1]
     @show μ_psuedo_pure = chemical_potential(model_co2, 1, 273.15, [1, 0])
-    @show "*****************"
     @test μ_pure ≈ μ_psuedo_pure[1]
 
     # fug_co2 = fugacity(model_co2_pure, 1, 273.15)
