@@ -192,5 +192,4 @@ function density_upper_bound(model::Clapeyron.SL, ω=[1])
         mole_fracs,
         molecular_weight(model)
     )
-
 end

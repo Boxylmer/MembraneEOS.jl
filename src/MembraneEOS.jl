@@ -15,7 +15,7 @@ module MembraneEOS
     end
 
     include("ChemicalLookup.jl")
-    include(joinpath("CubicEOS.jl"))
+    include("CubicEOS.jl")
     export PR
     export CubicParameters
     export CubicModel
@@ -23,7 +23,7 @@ module MembraneEOS
     # include(joinpath("SLClapeyronWrapper.jl"))
     include(joinpath("deprecated", "SanchezLacombe.jl"))
     export SL
-
+    include("SLMassBased.jl")
     # shared methods
     export pressure
     export volume
