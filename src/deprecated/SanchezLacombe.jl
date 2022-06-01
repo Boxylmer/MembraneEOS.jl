@@ -112,31 +112,14 @@ function sanchez_lacombe_chemical_potentials(components::AbstractVector{<:Sanche
     p★i = characteristic_pressure.(components)
     Δpij = sanchez_lacombe_Δpij(components, kij)
     
-    # if safeguards
-    #     if reduced_density > 1; 
-    #         println("ERROR 1"); 
-    #         return zeros(length(components)); 
-    #     end
-    #     if (reduced_density) < 0; 
-    #         println("ERROR 2"); 
-    #         return zeros(length(components)); 
-    #     end
-    #     if minimum(φ) < 0; 
-    #         println("ERROR 3"); 
-    #         return zeros(length(components)); 
-    #     end
-    # end
-    
     summation_terms = [sum([φ[jdx] * (p★i[jdx] - Δpij[idx, jdx]) for jdx in eachindex(φ, p★i)]) for idx in eachindex(φ, p★i)]
     term_1 = log.(reduced_density .* φ)
     # term_2 = -log(1 - reduced_density) .* (r_i0 .+ (r_i .- r_i0) ./ reduced_density)
-    term_2 = -log1p(-reduced_density) .* (r_i0 .+ (r_i .- r_i0) ./ reduced_density)
+    term_2 = -log1p(-reduced_density) .* (r_i0 .+ (r_i .+ r_i0) ./ reduced_density)
     term_3 = -r_i .+ 1
     term_4 = -reduced_density .* r_i0 .* (pure_characteristic_volume_i .* (p★i .+ summation_terms)) ./ (MembraneBase.R_MPA_L_K_MOL * temperature) 
     result = (term_1 .+ term_2 .+ term_3 .+ term_4) * MembraneBase.R_J_MOL_K * temperature
-    # result = sanchez_lacombe_chemical_potentials(
-    #     sanchez_lacombe_activities(components, kij, φ, r_i0, r_i, pure_characteristic_volume_i, reduced_density, temperature),
-    #     temperature)
+
     return result
 end
 
