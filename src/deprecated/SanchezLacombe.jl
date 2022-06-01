@@ -131,25 +131,6 @@ function sanchez_lacombe_activities(chemical_potentials, temperature)
     return exp.(chemical_potentials / (MembraneBase.R_J_MOL_K * temperature)) 
 end
 
-# function sanchez_lacombe_activities(components::AbstractVector{<:SanchezLacombeParameters}, kij, φ, r_i0, r_i, pure_characteristic_volume_i, reduced_density, temperature)
-#     # J/mol
-#     if (1 - reduced_density) < 0; return zeros(length(components)); end
-#     if (reduced_density) < 0; return zeros(length(components)); end
-#     if minimum(φ) < 0; return zeros(length(components)); end
-
-#     p★ = characteristic_pressure.(components)
-#     Δpij = sanchez_lacombe_Δpij(components, kij)
-    
-#     summation_terms = [sum([φ[jdx] * (p★[jdx] - Δpij[idx, jdx]) for jdx in eachindex(φ, p★)]) for idx in eachindex(φ, p★)]
-#     term_1 = reduced_density * φ
-#     term_2 = (1 - reduced_density) .^ -(r_i0 .+ (r_i .- r_i0) ./ reduced_density)
-#     term_3 = (-r_i) .+ 1
-#     term_4 = -reduced_density .* r_i0 .* pure_characteristic_volume_i ./ (MembraneBase.R_MPA_L_K_MOL * temperature) .* (p★ .+ summation_terms)
-#     return (term_1 .* term_2 .* exp.(term_3 .+ term_4)) 
-    
-#     # return exp.(sanchez_lacombe_chemical_potentials(components, kij, φ, r_i0, r_i, pure_characteristic_volume_i, reduced_density, temperature) / (R_J_MOL_K * temperature))
-# end
-
 function sanchez_lacombe_ri0(chemical::SanchezLacombeParameters)
     # number of lattice cells occupied by a molecule of pure component i
     # MPa * g/mol / ((MPa * cm^3 /mol /K) * K * g/cm^33)
