@@ -62,6 +62,7 @@ end
 """
 Chemical database functions and lookups
 """
+
 function find_chemical_row_index(chemical_name::String)
     chemical_row = get!(ChemicalNameToRowLookup, chemical_name, -1)  # -1 meaning there is no row with this data
     if chemical_row == -1  # get! adds the name to the dict, so we need to remove it if it returned -1
