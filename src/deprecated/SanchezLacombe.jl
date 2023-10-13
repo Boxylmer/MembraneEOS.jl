@@ -27,8 +27,10 @@ struct SanchezLacombeModel{CPT, KIJ_T}
     kij::KIJ_T
 end
 
-
+"Create a Sanchez Lacombe EOS from a component name. Fails if the name isn't in the current database."
 SL(component::String) = SL([component])
+
+"Create a Sanchez Lacombe EOS from a list of component names and a Kij matrix whose index corresponds to the `components` list. Fails if any name isn't in the current database."
 function SL(components::AbstractVector{<:String}, KIJ_matrix = nothing)
     if isnothing(KIJ_matrix)
         KIJ_matrix = get_kij_matrix(SanchezLacombe(), components)
@@ -40,6 +42,8 @@ function SL(components::AbstractVector{<:String}, KIJ_matrix = nothing)
     mw = Vector{Float64}(molecular_weight.(component_parameters))
     return SL(p★, t★, ρ★, mw, KIJ_matrix)
 end
+
+"Create a Sanchez Lacombe EOS from parameters directly."
 SL(p★::Number, t★::Number, ρ★::Number, mw::Number) = SL([p★], [t★], [ρ★], [mw])
 function SL(p★::AbstractVector, t★::AbstractVector, ρ★::AbstractVector, mw::AbstractVector, kij = zeros(length(mw),length(mw)))
     components = SanchezLacombeParameters.(p★, t★, ρ★, mw)
