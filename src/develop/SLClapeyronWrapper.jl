@@ -178,11 +178,7 @@ end
 
 activity(model::Clapeyron.SL, p_mpa, t_k, z=[1]) = exp.(chemical_potential(model, p_mpa, t_k, z) ./ (MembraneBase.R_J_MOL_K * t_k))
 
-activity_res(model::Clapeyron.SL, p_mpa, t_k, z=[1]) = exp.(chemical_potential_res(model, p_mpa, t_k, z) ./ (MembraneBase.R_J_MOL_K * t_k))
-
 ρTω_activity(model::Clapeyron.SL, ρ_g_cm3, t_k, ω=[1]) = exp.(ρTω_chemical_potential(model, ρ_g_cm3, t_k, ω) ./ (MembraneBase.R_J_MOL_K * t_k))
-
-ρTω_activity_res(model::Clapeyron.SL, ρ_g_cm3, t_k, ω=[1]) = exp.(ρTω_chemical_potential_res(model, ρ_g_cm3, t_k, ω) ./ (MembraneBase.R_J_MOL_K * t_k))
 
 "Density upper bound in g/cm^3."
 function density_upper_bound(model::Clapeyron.SL, ω=[1]) 

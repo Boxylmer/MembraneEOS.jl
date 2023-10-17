@@ -262,7 +262,7 @@ end
 function get_kij_matrix(database_dict::Dict{<:UnorderedChemicalPair, <:Number}, chemical_strings::AbstractVector{<:String}; missing_value=0, ideal_value=0)
     matrix_size = length(chemical_strings)
     # kijmat = Matrix{Any}(ideal_value, matrix_size, matrix_size)
-    kijmat = zeros(Union{Float64, Missing}, (matrix_size, matrix_size))
+    kijmat = zeros(Float64, (matrix_size, matrix_size)) # Union{Float64, Missing}
     for (idx1, comp_1) in enumerate(chemical_strings)
         for (idx2, comp_2) in enumerate(chemical_strings)
             if idx1 == idx2

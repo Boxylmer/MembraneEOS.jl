@@ -1,6 +1,7 @@
 #=
 Cubic Equations of State
 =#
+
 struct CubicParameters{TCT, PCT, ACT, MWT}
     critical_temperature_k::TCT
     critical_pressure_atm::PCT
@@ -14,7 +15,7 @@ critical_pressure(cp::CubicParameters) = cp.critical_pressure_atm
 acentric_factor(cp::CubicParameters) = cp.acentric_factor
 molecular_weight(cp::CubicParameters) = cp.molecular_weight
 
-struct CubicModel{MT, CPT, KIJ_T, N, L}
+struct CubicModel{MT, CPT, KIJ_T, N, L} <: MEOSModel
     modeltype::MT 
     components::SVector{N, CPT}
     kij::SMatrix{N, N, KIJ_T, L}
@@ -31,9 +32,10 @@ end
 
 # Peng Robinson 
 struct PengRobinson end
+PR() = PengRobinson()
 function get_kij(::PengRobinson, component_1::String, component_2::String; default_value=0.0)
-    if component_1 == component_2 return 0.0 end
-    return get_kij(PRKijLookup, component_1, component_2; default_value=default_value)  # maybe add a default value?
+    if component_1 == component_2 return default_value end
+    return get_kij(PRKijLookup, component_1, component_2)
 end
 function get_kij_matrix(::PengRobinson, components::AbstractVector{<:String})
     return get_kij_matrix(PRKijLookup, components)
@@ -63,7 +65,7 @@ end
 function PR(pc_atm::AbstractVector, tc_k::AbstractVector, omega::AbstractVector, KIJ_matrix=nothing)
 	params = [CubicParameters(tc_k[i], pc_atm[i], omega[i]) for i in eachindex(tc_k, pc_atm, omega)]
     return PR(params, KIJ_matrix)
-end
+end 
 
 PR(pc_atm::Number, tc_k::Number, ω::Number, mw=missing) = PR(CubicParameters(tc_k, pc_atm, ω, mw))
 PR(params::CubicParameters) = PR([params])
@@ -155,7 +157,7 @@ end
 
 # functionality
 
-"Get pressure in atm"
+"Get pressure in MPa"
 function MembraneBase.pressure(model::CubicModel, v_l_mol, t_k, mole_fractions=[1])
     omega_a, omega_b, c1, c2 = get_cubic_eos_constants(model.modeltype)
     # now that we know we have temperature, lets do all the temperature related calculations we can
@@ -166,18 +168,20 @@ function MembraneBase.pressure(model::CubicModel, v_l_mol, t_k, mole_fractions=[
     b_mixed = van_der_waals_mixing_b(b_values, mole_fractions)
     a_mixed = van_der_waals_mixing_a(a_values, mole_fractions, model.kij)
 
-    return cubic_eos_pressure(R_ATM_L_K_MOL, t_k, v_l_mol, a_mixed, b_mixed, c1, c2)
+    return cubic_eos_pressure(R_ATM_L_K_MOL, t_k, v_l_mol, a_mixed, b_mixed, c1, c2) * MembraneBase.MPA_PER_ATM
 end
 
 "Get volume in L/mol"
-function volume(model::CubicModel, p_atm, t_k, mole_fractions=[1])
-    z = compressibility_factor(model, p_atm, t_k, mole_fractions)
+function volume(model::CubicModel, p_mpa, t_k, mole_fractions=[1])
+    p_atm = p_mpa * MembraneBase.ATM_PER_MPA
+    z = compressibility_factor(model, p_mpa, t_k, mole_fractions)
     v = z * R_ATM_L_K_MOL * t_k / p_atm
     return v
 end
 
 "Get a vector of fugacities in atm"
-function fugacity(model::CubicModel, p_atm, t_k, mole_fractions=[1])
+function fugacity(model::CubicModel, p_mpa, t_k, mole_fractions=[1])
+    p_atm = p_mpa * MembraneBase.ATM_PER_MPA  
     omega_a, omega_b, c1, c2 = get_cubic_eos_constants(model.modeltype)
     b_values = cubic_b_parameters(omega_b, model.components)
     alphas = cubic_alphas(model.modeltype, t_k, model.components)
@@ -196,7 +200,8 @@ end
 
 molecular_weight(model::CubicModel) = molecular_weight.(model.components)
 
-function compressibility_factor(model::CubicModel, p_atm, t_k, mole_fractions=[1])
+function compressibility_factor(model::CubicModel, p_mpa, t_k, mole_fractions=[1])
+    p_atm = p_mpa * MembraneBase.ATM_PER_MPA
     omega_a, omega_b, c1, c2 = get_cubic_eos_constants(model.modeltype)
     b_values = cubic_b_parameters(omega_b, model.components)
     alphas = cubic_alphas(model.modeltype, t_k, model.components)
@@ -225,3 +230,5 @@ function VT_compressibility_factor(model::CubicModel, v_l_mol, t_k, mole_fractio
     B = b_mixed * p / (R_ATM_L_K_MOL * t_k)
     return cubic_eos_compressibility(A, B, c1, c2)
 end
+
+density_upper_bound(::CubicModel, _=[1]) = Inf

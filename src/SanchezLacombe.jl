@@ -1,4 +1,5 @@
 struct SanchezLacombe end
+SL() = SanchezLacombe()
 
 function get_kij(::SanchezLacombe, component_1::String, component_2::String)
     if component_1 == component_2 return 0.0 end
@@ -22,7 +23,7 @@ characteristic_density(slp::SanchezLacombeParameters) = slp.characteristic_densi
 molecular_weight(slp::SanchezLacombeParameters) = slp.molecular_weight
 
 
-struct SanchezLacombeModel{CPT, KIJ_T}
+struct SanchezLacombeModel{CPT, KIJ_T} <: MEOSModel
     components::CPT
     kij::KIJ_T
 end

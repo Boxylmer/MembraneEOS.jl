@@ -14,14 +14,19 @@ module MembraneEOS
         ones(matrix_size,matrix_size) * initial_value
     end
 
+    include("EOSAbstractions.jl")
+
     include("ChemicalLookup.jl")
+    export get_kij
+    export get_kij_matrix
+
     include(joinpath("CubicEOS.jl"))
     export PR
     export CubicParameters
     export CubicModel
     
     # include(joinpath("SLClapeyronWrapper.jl"))
-    include(joinpath("deprecated", "SanchezLacombe.jl"))
+    include(joinpath("SanchezLacombe.jl"))
     export SL
 
     # shared methods
@@ -41,14 +46,9 @@ module MembraneEOS
     export ρTω_chemical_potential
     export ρTω_chemical_potential_res
     export activity
-    export activity_res
     export ρTω_activity
-    export ρTω_activity_res
     export density_upper_bound
     
-    export get_kij
-    export get_kij_matrix
-
     export strip_measurement_to_value
 
     function __init__()

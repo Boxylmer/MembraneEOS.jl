@@ -48,9 +48,7 @@
     @test a_ρTω ≈ a 
 
     # μ_ρtω_res = ρTω_chemical_potential_res(co2_ch4_model, ρ, t, ω)
-    # ρTω_a_res = ρTω_activity_res(co2_ch4_model, ρ, t, ω)
     # μ_pt_res = chemical_potential_res(co2_ch4_model, p, t, z)
-    # a_pt_res = activity_res(co2_ch4_model, p, t, z)
 
     # @test a_pt_res ≈ ρTω_a_res
     # @test μ_pt_res ≈ μ_ρtω_res
