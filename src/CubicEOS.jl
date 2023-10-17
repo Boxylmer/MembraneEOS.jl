@@ -8,8 +8,29 @@ struct CubicParameters{TCT, PCT, ACT, MWT}
     acentric_factor::ACT
     molecular_weight::MWT
 end
-CubicParameters(tc_k, pc_atm, ω) = CubicParameters(tc_k, pc_atm, ω, missing)
+
+"""
+    CubicParameters(s::String)
+Attempt to look up a set of cubic parameters, returns missing if not found.
+"""
+CubicParameters(s::String) = CubicParameters(ChemicalParameters(s))
+CubicParameters(::Missing) = missing
+"""
+    CubicParameters(critical_temperature, critical_pressure, acentric_factor, [molecular_weight])
+
+Directly create some chemical's CubicParameters. Molecular weight is optional as it isn't necessary for standard functionality. 
+
+| Parameters           | Units   |
+|----------------------|---------|
+| Critical Temperature | K       |
+| Critical Pressure    | atm     |
+| Acentric Factor      | n/a     |
+| Molecular Weight     | g/mol   |
+    
+
+"""
 CubicParameters(cp::ChemicalParameters) = CubicParameters(critical_temperature(cp), critical_pressure(cp), acentric_factor(cp), molecular_weight(cp))
+CubicParameters(tc_k, pc_atm, ω) = CubicParameters(tc_k, pc_atm, ω, missing)
 critical_temperature(cp::CubicParameters) = cp.critical_temperature_k
 critical_pressure(cp::CubicParameters) = cp.critical_pressure_atm
 acentric_factor(cp::CubicParameters) = cp.acentric_factor
@@ -37,43 +58,56 @@ function get_kij(::PengRobinson, component_1::String, component_2::String; defau
     if component_1 == component_2 return default_value end
     return get_kij(PRKijLookup, component_1, component_2)
 end
-function get_kij_matrix(::PengRobinson, components::AbstractVector{<:String})
+function get_kij_matrix(::PengRobinson, components::AbstractVector{<:AbstractString})
     return get_kij_matrix(PRKijLookup, components)
 end 
 get_cubic_eos_constants(::PengRobinson) = 0.45724, 0.07780, 1-√2, 1+√2  # Ωa, Ωb, c1, c2
 alpha(::PengRobinson, t, tc, acentric_factor) = (1 + m(PengRobinson(), acentric_factor) * (1 - sqrt(t/tc)))^2
 m(::PengRobinson, acentric_factor) = 0.37464 + 1.54226*acentric_factor + 0.26992*acentric_factor^2
 
+
 function PR(chemical::String)
     component_parameters = ChemicalParameters(chemical)
     cubic_parameters = CubicParameters(component_parameters)
     return PR(cubic_parameters)
 end
-function PR(chemicals::AbstractVector, KIJ_matrix = nothing)
-    if isnothing(KIJ_matrix) 
-        KIJ_matrix = get_kij_matrix(PengRobinson(), chemicals)
+
+"""
+    PR(chemicals::AbstractVector{<:AbstractString}, [kij=nothing])
+Create a Peng Robinson EOS via a vector of chemical names and a KIJ matrix.
+- If `kij` is not specified, this will attempt to look up interactions based on the names of the chemicals. 
+"""
+function PR(chemicals::AbstractVector, kij = nothing)
+    if isnothing(kij) && eltype(chemicals) <: AbstractString
+        kij = get_kij_matrix(PengRobinson(), chemicals)
     end
 
     component_parameters = ChemicalParameters(chemicals)
     cubic_parameters = CubicParameters.(component_parameters)
-    return PR(cubic_parameters, KIJ_matrix)
+    return PR(cubic_parameters, kij)
 end
-function PR(pc_atm::AbstractVector, tc_k::AbstractVector, omega::AbstractVector, mw::AbstractVector, KIJ_matrix=nothing)
+function PR(pc_atm::AbstractVector, tc_k::AbstractVector, omega::AbstractVector, mw::AbstractVector, kij=nothing)
 	params = [CubicParameters(tc_k[i], pc_atm[i], omega[i], mw[i]) for i in eachindex(tc_k, pc_atm, omega, mw)]
-    return PR(params, KIJ_matrix)
+    return PR(params, kij)
 end
-function PR(pc_atm::AbstractVector, tc_k::AbstractVector, omega::AbstractVector, KIJ_matrix=nothing)
+function PR(pc_atm::AbstractVector, tc_k::AbstractVector, omega::AbstractVector, kij=nothing)
 	params = [CubicParameters(tc_k[i], pc_atm[i], omega[i]) for i in eachindex(tc_k, pc_atm, omega)]
-    return PR(params, KIJ_matrix)
+    return PR(params, kij)
 end 
 
 PR(pc_atm::Number, tc_k::Number, ω::Number, mw=missing) = PR(CubicParameters(tc_k, pc_atm, ω, mw))
 PR(params::CubicParameters) = PR([params])
-function PR(params::AbstractVector{<:CubicParameters}, KIJ_matrix=nothing)  # base method
-    if isnothing(KIJ_matrix)
-        KIJ_matrix = initmatrix(params)
+
+"""
+    PR(chemicals::AbstractVector{<:CubicParameters}, [kij=nothing])
+Create a Peng Robinson EOS via a vector of `CubicParameters` and a KIJ matrix.
+- If `kij` is not specified, it will be initialized with ideal interactions. 
+"""
+function PR(params::AbstractVector{<:CubicParameters}, kij=nothing)  # base method
+    if isnothing(kij)
+        kij = initmatrix(params)
     end
-    return CubicModel(PengRobinson(), params, KIJ_matrix)
+    return CubicModel(PengRobinson(), params, kij)
 end
 
 # define all general computation methods
@@ -157,7 +191,6 @@ end
 
 # functionality
 
-"Get pressure in MPa"
 function MembraneBase.pressure(model::CubicModel, v_l_mol, t_k, mole_fractions=[1])
     omega_a, omega_b, c1, c2 = get_cubic_eos_constants(model.modeltype)
     # now that we know we have temperature, lets do all the temperature related calculations we can
@@ -171,7 +204,6 @@ function MembraneBase.pressure(model::CubicModel, v_l_mol, t_k, mole_fractions=[
     return cubic_eos_pressure(R_ATM_L_K_MOL, t_k, v_l_mol, a_mixed, b_mixed, c1, c2) * MembraneBase.MPA_PER_ATM
 end
 
-"Get volume in L/mol"
 function volume(model::CubicModel, p_mpa, t_k, mole_fractions=[1])
     p_atm = p_mpa * MembraneBase.ATM_PER_MPA
     z = compressibility_factor(model, p_mpa, t_k, mole_fractions)
@@ -179,7 +211,6 @@ function volume(model::CubicModel, p_mpa, t_k, mole_fractions=[1])
     return v
 end
 
-"Get a vector of fugacities in atm"
 function fugacity(model::CubicModel, p_mpa, t_k, mole_fractions=[1])
     p_atm = p_mpa * MembraneBase.ATM_PER_MPA  
     omega_a, omega_b, c1, c2 = get_cubic_eos_constants(model.modeltype)

@@ -16,6 +16,26 @@ struct SanchezLacombeParameters{CPT, CTT, CDT, MWT}
     characteristic_density_g_cm3::CDT
     molecular_weight::MWT
 end
+"""
+    SanchezLacombeParameters(s::String)
+Attempt to look up a set of Sanchez Lacombe parameters, returns missing if not found.
+"""
+SanchezLacombeParameters(s::String) = SanchezLacombeParameters(ChemicalParameters(s))
+SanchezLacombeParameters(::Missing) = missing
+
+"""
+    SanchezLacombeParameters(characteristic_pressure, characteristic_temperature, characteristic_density, molecular_weight)
+
+Directly create some chemical's SanchezLacombeParameters.
+    
+| Parameters                 | Units   |
+|----------------------------|---------|
+| Characteristic Temperature | K       |
+| Characteristic Pressure    | MPa     |
+| Characteristic Density     | g/cm3   |
+| Molecular Weight           | g/mol   |
+    
+"""
 SanchezLacombeParameters(cp::ChemicalParameters) = SanchezLacombeParameters(characteristic_pressure(cp), characteristic_temperature(cp), characteristic_density(cp), molecular_weight(cp))
 characteristic_pressure(slp::SanchezLacombeParameters) = slp.characteristic_pressure_mpa
 characteristic_temperature(slp::SanchezLacombeParameters) = slp.characteristic_temperature_k
@@ -28,28 +48,39 @@ struct SanchezLacombeModel{CPT, KIJ_T} <: MEOSModel
     kij::KIJ_T
 end
 
-"Create a Sanchez Lacombe EOS from a component name. Fails if the name isn't in the current database."
-SL(component::String) = SL([component])
+"""
+    SL(chemicals::AbstractVector{<:SanchezLacombeParameters}, [kij=nothing])
+Create a Sanchez Lacombe EOS via a vector of `SanchezLacombeParameters` and a KIJ matrix.
+- If `kij` is not specified, it will be initialized with ideal interactions. 
+"""
+function SL(components::AbstractVector{<:SanchezLacombeParameters}, kij=zeros(length(components), length(components)))
+    return SanchezLacombeModel(components, kij)
+end
+SL(components::SanchezLacombeParameters, kwargs...) = SL([components], kwargs...)
+SL(p★::Number, t★::Number, ρ★::Number, mw::Number) = SL([p★], [t★], [ρ★], [mw])
+function SL(p★::AbstractVector, t★::AbstractVector, ρ★::AbstractVector, mw::AbstractVector, kij = zeros(length(mw),length(mw)))
+    components = SanchezLacombeParameters.(p★, t★, ρ★, mw)
+    return SanchezLacombeModel(components, kij)
+end
 
-"Create a Sanchez Lacombe EOS from a list of component names and a Kij matrix whose index corresponds to the `components` list. Fails if any name isn't in the current database."
-function SL(components::AbstractVector{<:String}, KIJ_matrix = nothing)
-    if isnothing(KIJ_matrix)
-        KIJ_matrix = get_kij_matrix(SanchezLacombe(), components)
+"""
+    SL(chemicals::AbstractVector{<:AbstractString}, [kij=nothing])
+Create a Sanchez Lacombe EOS via a vector of chemical names and a KIJ matrix.
+- If `kij` is not specified, this will attempt to look up interactions based on the names of the chemicals. 
+"""
+function SL(components::AbstractVector{<:String}, kij = nothing)
+    if isnothing(kij)
+        kij = get_kij_matrix(SanchezLacombe(), components)
     end
     component_parameters = ChemicalParameters(components)
     t★ = characteristic_temperature.(component_parameters)
     p★ = characteristic_pressure.(component_parameters)
     ρ★ = characteristic_density.(component_parameters)
     mw = Vector{Float64}(molecular_weight.(component_parameters))
-    return SL(p★, t★, ρ★, mw, KIJ_matrix)
+    return SL(p★, t★, ρ★, mw, kij)
 end
+SL(component::String) = SL([component])
 
-"Create a Sanchez Lacombe EOS from parameters directly."
-SL(p★::Number, t★::Number, ρ★::Number, mw::Number) = SL([p★], [t★], [ρ★], [mw])
-function SL(p★::AbstractVector, t★::AbstractVector, ρ★::AbstractVector, mw::AbstractVector, kij = zeros(length(mw),length(mw)))
-    components = SanchezLacombeParameters.(p★, t★, ρ★, mw)
-    return SanchezLacombeModel(components, kij)
-end
 
 molecular_weight(model::SanchezLacombeModel) = molecular_weight.(model.components)
 
@@ -223,7 +254,6 @@ function MembraneBase.pressure(model::SanchezLacombeModel, v, t, mole_fractions=
         return pressure_mpa
 end
 
-"Volume in L/mol"
 function volume(model::SanchezLacombeModel, p, t, mole_fractions=[1])
     # mass_fractions = mole_fractions_to_mass_fractions(mole_fractions, molecular_weight.(model.components))
     # mixed_characteristic_density = sanchez_lacombe_mixed_characteristic_density(model.components, mass_fractions)
@@ -244,7 +274,6 @@ function volume(model::SanchezLacombeModel, p, t, mole_fractions=[1])
     return volume
 end
 
-"Density in g/cm^3"
 function mass_density(model::SanchezLacombeModel, p, t, mole_fractions=[1])
     mass_fractions = mole_fractions_to_mass_fractions(mole_fractions, molecular_weight.(model.components))
     mixed_characteristic_density = sanchez_lacombe_mixed_characteristic_density(model.components, mass_fractions)

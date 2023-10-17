@@ -90,16 +90,16 @@ end
 
 
 SL(component::String) = SL([component])
-function SL(components::AbstractVector, KIJ_matrix = nothing)
-    if isnothing(KIJ_matrix)
-        KIJ_matrix = get_kij_matrix(SanchezLacombe(), components)
+function SL(components::AbstractVector, kij = nothing)
+    if isnothing(kij)
+        kij = get_kij_matrix(SanchezLacombe(), components)
     end
     component_parameters = ChemicalParameters(components)
     t★ = characteristic_temperature.(component_parameters)
     p★ = characteristic_pressure.(component_parameters)
     ρ★ = characteristic_density.(component_parameters)
     mw = Vector{Float64}(molecular_weight.(component_parameters))
-    return SL(p★, t★, ρ★, mw, KIJ_matrix)
+    return SL(p★, t★, ρ★, mw, kij)
 end
 SL(p★::Number, t★::Number, ρ★::Number, mw::Number) = SL([p★], [t★], [ρ★], [mw])
 function SL(p★::AbstractVector, t★::AbstractVector, ρ★::AbstractVector, mw::AbstractVector, kij = zeros(length(mw),length(mw)))

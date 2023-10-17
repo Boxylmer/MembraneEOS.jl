@@ -14,12 +14,14 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
+        "Parameters" => "parameters.md",
+        "Models" => "models.md",
+        "Available Functions" => "functions.md",
+        "Internals" => "misc.md"
     ],
-    strict=false,
 )
 
 deploydocs(;
     repo="github.com/Boxylmer/MembraneEOS.jl.git",
     devbranch="master",
-    
 )

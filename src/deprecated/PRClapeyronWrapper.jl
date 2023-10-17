@@ -102,6 +102,6 @@ volume(co2model, 101325 ± 100, 308.15 ± 34)
 #     # look up from binary interaction CSV -> UnorderedChemicalPair
 #     # use both of these to call the constructor below
 # end
-# function PR(pc_atm::AbstractVector, tc_k::AbstractVector, omega::AbstractVector, KIJ_matrix=nothing)
+# function PR(pc_atm::AbstractVector, tc_k::AbstractVector, omega::AbstractVector, kij=nothing)
 	
 # end

@@ -5,21 +5,21 @@ abstract type MEOSModel end
 """
     pressure(model, v, t, [mole_fractions])
 
-Get the pressure of the state in MPa given a volume (L/mol), temperature (K) and optional composition in mole fraction (can be omitted if the system is pure).
+Get the pressure of the state in MPa given a volume (L/mol), temperature (K) and composition in mole fraction (can be omitted if the system is pure).
 """
-pressure(::MEOSModel, _, _, args...) = throw(ErrorException("Pressure not implemented for this model."))
+MembraneEOS.pressure(::MEOSModel, _, _, args...) = throw(ErrorException("Pressure not implemented for this model."))
 
 """
     volume(model, p, t, [mole_fractions])
 
-Get the volume of the state in MPa given a pressure (MPa), temperature (K) and optional composition in mole fraction (can be omitted if the system is pure).
+Get the volume of the state in MPa given a pressure (MPa), temperature (K) and composition in mole fraction (can be omitted if the system is pure).
 """
 volume(::MEOSModel, _, _, args...) = throw(ErrorException("Volume not implemented for this model."))
 
 """
     fugacity(model, p, t, [mole_fractions])
 
-Get the fugacity of the state in MPa given a pressure (MPa), temperature (K) and optional composition in mole fraction (can be omitted if the system is pure).
+Get a vector of fugacities for each component in the state in MPa given a pressure (MPa), temperature (K) and composition in mole fraction (can be omitted if the system is pure).
 """
 fugacity(::MEOSModel, _, _, args...) = throw(ErrorException("Fugacity not implemented for this model."))
 
@@ -29,14 +29,14 @@ molecular_weight(::MEOSModel, args...) = throw(ErrorException("Molecular weight 
 """
     compressibility_factor(model, p, t, [mole_fractions])
 
-Get the compressibility factor (z) of the state given a pressure (MPa), temperature (K) and optional composition in mole fraction (can be omitted if the system is pure).
+Get the compressibility factor (z) of the state given a pressure (MPa), temperature (K) and composition in mole fraction (can be omitted if the system is pure).
 """
 compressibility_factor(::MEOSModel, _, _, args...) = throw(ErrorException("Compressibility factor not implemented for this model."))
 
 """
     compressibility_factor(model, v, t, [mole_fractions])
 
-Get the compressibility factor (z) of the state given a volume (L/mol), temperature (K) and optional composition in mole fraction (can be omitted if the system is pure).
+Get the compressibility factor (z) of the state given a volume (L/mol), temperature (K) and composition in mole fraction (can be omitted if the system is pure).
 """
 VT_compressibility_factor(::MEOSModel, _, _, args...)  = throw(ErrorException("VT compressibility factor not implemented for this model."))
 
@@ -46,63 +46,63 @@ VT_compressibility_factor(::MEOSModel, _, _, args...)  = throw(ErrorException("V
 """
     mass_density(model, p, t, [mole_fractions])
 
-Get the mass density of the state in g/cm3 given a pressure (MPa), temperature (K) and optional composition in mole fraction (can be omitted if the system is pure).
+Get the mass density of the state in g/cm3 given a pressure (MPa), temperature (K) and composition in mole fraction (can be omitted if the system is pure).
 """
 mass_density(::MEOSModel, args...) = throw(ErrorException("Mass density not implemented for this model."))
 
 """
     VT_mass_density(model, v, t, [mole_fractions])
 
-Get the density of the state in g/cm3 given a volume (L/mol), temperature (K) and optional composition in mole fraction (can be omitted if the system is pure).
+Get the density of the state in g/cm3 given a volume (L/mol), temperature (K) and composition in mole fraction (can be omitted if the system is pure).
 """
 VT_mass_density(::MEOSModel, args...) = throw(ErrorException("VT Mass density not implemented for this model."))
 
 """
     chemical_potential(model, p, t, [mole_fractions])
 
-Get the chemical potential of the state in J/mol given a pressure (MPa), temperature (K) and optional composition in mole fraction (can be omitted if the system is pure).
+Get the chemical potential of the state in J/mol given a pressure (MPa), temperature (K) and composition in mole fraction (can be omitted if the system is pure).
 """
 chemical_potential(::MEOSModel, args...) = throw(ErrorException("Chemical potential not implemented for this model."))
 
 """
     chemical_potential_res(model, p, t, [mole_fractions])
 
-Get the residual chemical potential of the state in J/mol given a pressure (MPa), temperature (K) and optional composition in mole fraction (can be omitted if the system is pure).
+Get the residual chemical potential of the state in J/mol given a pressure (MPa), temperature (K) and composition in mole fraction (can be omitted if the system is pure).
 """
 chemical_potential_res(::MEOSModel, args...) = throw(ErrorException("Residual chemical potential not implemented for this model."))
 
 """
     VT_chemical_potential(model, v, t, [mole_fractions])
 
-Get the chemical potential of the state in J/mol given a volume (L/mol), temperature (K) and optional composition in mole fraction (can be omitted if the system is pure).
+Get the chemical potential of the state in J/mol given a volume (L/mol), temperature (K) and composition in mole fraction (can be omitted if the system is pure).
 """
 VT_chemical_potential(::MEOSModel, args...) = throw(ErrorException("VT chemical potential not implemented for this model."))
 
 """
     ρTω_chemical_potential(model, ρ, t, [mass_fractions])
 
-Get the chemical potential of the state in J/mol given a density (g/cm3), temperature (K) and optional composition in mass fraction (can be omitted if the system is pure).
+Get the chemical potential of the state in J/mol given a density (g/cm3), temperature (K) and composition in mass fraction (can be omitted if the system is pure).
 """
 ρTω_chemical_potential(::MEOSModel, args...) = throw(ErrorException("ρTω chemical potential not implemented for this model."))
 
 """
     ρTω_chemical_potential_res(model, ρ, t, [mass_fractions])
 
-Get the residual chemical potential of the state in J/mol given a density (g/cm3), temperature (K) and optional composition in mass fraction (can be omitted if the system is pure).
+Get the residual chemical potential of the state in J/mol given a density (g/cm3), temperature (K) and composition in mass fraction (can be omitted if the system is pure).
 """
 ρTω_chemical_potential_res(::MEOSModel, args...) = throw(ErrorException("Residual ρTω chemical potential not implemented for this model."))
 
 """
     activity(model, p, t, [mole_fractions])
 
-Get the chemical activity of the state given a pressure (MPa), temperature (K) and optional composition in mole fraction (can be omitted if the system is pure).
+Get the chemical activity of the state given a pressure (MPa), temperature (K) and composition in mole fraction (can be omitted if the system is pure).
 """
 activity(::MEOSModel, args...) = throw(ErrorException("Activity not implemented for this model."))
 
 """
     ρTω_activity(model, ρ, t, [mass_fractions])
 
-Get the chemical activity of the state given a density (g/cm3), temperature (K) and optional composition in mass fraction (can be omitted if the system is pure).
+Get the chemical activity of the state given a density (g/cm3), temperature (K) and composition in mass fraction (can be omitted if the system is pure).
 """
 ρTω_activity(::MEOSModel, args...) = throw(ErrorException("ρTω activity not implemented for this model."))
 
