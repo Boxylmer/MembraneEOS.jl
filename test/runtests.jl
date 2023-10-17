@@ -1,7 +1,5 @@
-
-using MembraneBase
-using Revise
 using Test
+using MembraneBase
 using MembraneEOS
 using Random
 using Measurements

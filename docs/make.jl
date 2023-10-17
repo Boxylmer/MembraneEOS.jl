@@ -2,10 +2,10 @@ using Documenter
 using MembraneEOS
 
 makedocs(;
-    modules=[MembraneBase],
+    modules=[MembraneEOS],
     authors="Will <william.joseph.box@gmail.com> and contributors",
     repo="https://github.com/Boxylmer/MembraneEOS.jl/blob/{commit}{path}#{line}",
-    sitename="MembraneBase.jl",
+    sitename="MembraneEOS.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
         canonical="https://Boxylmer.github.io/MembraneEOS.jl",
