@@ -18,6 +18,11 @@
     pres = pressure(model_co2, vol, 273.15, [0.5, 0.5])
     @test 1. ≈ pres
 
+    co2_pure = SanchezLacombeParameters(630.0, 300.0, 1.515, 44.0)
+    model_co2_standard_method = MembraneEOS.SL(co2_pure, [0 0; 0 0])
+    vol_standard_method = volume(model_co2_standard_method, 1., 273.15)
+    @test vol_standard_method ≈ vol
+
     @show μ_pure = chemical_potential(model_co2_pure, 1, 273.15)[1]
     @show μ_psuedo_pure = chemical_potential(model_co2, 1, 273.15, [1, 0])
     @test μ_pure ≈ μ_psuedo_pure[1]
@@ -48,9 +53,7 @@
     @test a_ρTω ≈ a 
 
     # μ_ρtω_res = ρTω_chemical_potential_res(co2_ch4_model, ρ, t, ω)
-    # ρTω_a_res = ρTω_activity_res(co2_ch4_model, ρ, t, ω)
     # μ_pt_res = chemical_potential_res(co2_ch4_model, p, t, z)
-    # a_pt_res = activity_res(co2_ch4_model, p, t, z)
 
     # @test a_pt_res ≈ ρTω_a_res
     # @test μ_pt_res ≈ μ_ρtω_res

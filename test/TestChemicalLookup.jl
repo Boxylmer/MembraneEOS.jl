@@ -36,8 +36,8 @@ ch4_co2_kij = MembraneEOS.get_kij(MembraneEOS.PRKijLookup, "CH4", "CO2")
 
 # if we want to make interaction tables manually, we can load the specific tables and some components
 # this is automatically handled in the actual EOS functions (e.g., PengRobinson) though. 
-co2_ch4_missing = MembraneEOS.get_kij_matrix(MembraneEOS.PRKijLookup, ["CH4", "CO2", "Something not in the database"]; missing_value=missing, ideal_value=10)
-@test ismissing(co2_ch4_missing[1, 3])
+co2_ch4_missing = MembraneEOS.get_kij_matrix(MembraneEOS.PRKijLookup, ["CH4", "CO2", "Something not in the database"]; missing_value=NaN, ideal_value=10)
+@test isnan(co2_ch4_missing[1, 3])
 @test co2_ch4_missing[1, 1] == 10
 @test co2_ch4_missing[3, 3] == 10
 

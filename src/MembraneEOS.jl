@@ -9,20 +9,28 @@ module MembraneEOS
     using Roots
 
     # using Measurements  # causes stack overflow errors somehow??
-    function initmatrix(components::AbstractVector; initial_value = 0.0)
-        matrix_size = length(components)
-        ones(matrix_size,matrix_size) * initial_value
-    end
+    """
+        initmatrix(components::AbstractVector; [initial_value=0.0])
+    Create an ideal KIJ matrix from a list of components or just a number of elements.
+    """
+    initmatrix(components::AbstractVector; initial_value = 0.0) = initmatrix(length(components); initial_value)
+    initmatrix(n; initial_value = 0.0) = ones(n, n) * initial_value
+
+    include("EOSAbstractions.jl")
 
     include("ChemicalLookup.jl")
+    export get_kij
+    export get_kij_matrix
+
     include(joinpath("CubicEOS.jl"))
     export PR
     export CubicParameters
     export CubicModel
     
     # include(joinpath("SLClapeyronWrapper.jl"))
-    include(joinpath("deprecated", "SanchezLacombe.jl"))
+    include(joinpath("SanchezLacombe.jl"))
     export SL
+    export SanchezLacombeParameters
 
     # shared methods
     export pressure
@@ -41,14 +49,9 @@ module MembraneEOS
     export ρTω_chemical_potential
     export ρTω_chemical_potential_res
     export activity
-    export activity_res
     export ρTω_activity
-    export ρTω_activity_res
     export density_upper_bound
     
-    export get_kij
-    export get_kij_matrix
-
     export strip_measurement_to_value
 
     function __init__()

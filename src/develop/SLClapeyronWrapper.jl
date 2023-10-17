@@ -90,16 +90,16 @@ end
 
 
 SL(component::String) = SL([component])
-function SL(components::AbstractVector, KIJ_matrix = nothing)
-    if isnothing(KIJ_matrix)
-        KIJ_matrix = get_kij_matrix(SanchezLacombe(), components)
+function SL(components::AbstractVector, kij = nothing)
+    if isnothing(kij)
+        kij = get_kij_matrix(SanchezLacombe(), components)
     end
     component_parameters = ChemicalParameters(components)
     t★ = characteristic_temperature.(component_parameters)
     p★ = characteristic_pressure.(component_parameters)
     ρ★ = characteristic_density.(component_parameters)
     mw = Vector{Float64}(molecular_weight.(component_parameters))
-    return SL(p★, t★, ρ★, mw, KIJ_matrix)
+    return SL(p★, t★, ρ★, mw, kij)
 end
 SL(p★::Number, t★::Number, ρ★::Number, mw::Number) = SL([p★], [t★], [ρ★], [mw])
 function SL(p★::AbstractVector, t★::AbstractVector, ρ★::AbstractVector, mw::AbstractVector, kij = zeros(length(mw),length(mw)))
@@ -178,11 +178,7 @@ end
 
 activity(model::Clapeyron.SL, p_mpa, t_k, z=[1]) = exp.(chemical_potential(model, p_mpa, t_k, z) ./ (MembraneBase.R_J_MOL_K * t_k))
 
-activity_res(model::Clapeyron.SL, p_mpa, t_k, z=[1]) = exp.(chemical_potential_res(model, p_mpa, t_k, z) ./ (MembraneBase.R_J_MOL_K * t_k))
-
 ρTω_activity(model::Clapeyron.SL, ρ_g_cm3, t_k, ω=[1]) = exp.(ρTω_chemical_potential(model, ρ_g_cm3, t_k, ω) ./ (MembraneBase.R_J_MOL_K * t_k))
-
-ρTω_activity_res(model::Clapeyron.SL, ρ_g_cm3, t_k, ω=[1]) = exp.(ρTω_chemical_potential_res(model, ρ_g_cm3, t_k, ω) ./ (MembraneBase.R_J_MOL_K * t_k))
 
 "Density upper bound in g/cm^3."
 function density_upper_bound(model::Clapeyron.SL, ω=[1]) 
