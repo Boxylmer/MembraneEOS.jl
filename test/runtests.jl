@@ -1,7 +1,6 @@
 using Test
 using MembraneBase
 using MembraneEOS
-using Random
 using Measurements
 
 @testset "MembraneEOS.jl" begin
