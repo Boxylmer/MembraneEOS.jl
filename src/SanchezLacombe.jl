@@ -9,20 +9,6 @@ function get_kij_matrix(::SanchezLacombe, components::AbstractVector{<:String})
     return get_kij_matrix(SLKijLookup, components)
 end 
 
-
-struct SanchezLacombeParameters{CPT, CTT, CDT, MWT}
-    characteristic_pressure_mpa::CPT
-    characteristic_temperature_k::CTT
-    characteristic_density_g_cm3::CDT
-    molecular_weight::MWT
-end
-"""
-    SanchezLacombeParameters(s::String)
-Attempt to look up a set of Sanchez Lacombe parameters, returns missing if not found.
-"""
-SanchezLacombeParameters(s::String) = SanchezLacombeParameters(ChemicalParameters(s))
-SanchezLacombeParameters(::Missing) = missing
-
 """
     SanchezLacombeParameters(characteristic_pressure, characteristic_temperature, characteristic_density, molecular_weight)
 
@@ -36,7 +22,21 @@ Directly create some chemical's SanchezLacombeParameters.
 | Molecular Weight           | g/mol   |
     
 """
-SanchezLacombeParameters(cp::ChemicalParameters) = SanchezLacombeParameters(characteristic_pressure(cp), characteristic_temperature(cp), characteristic_density(cp), molecular_weight(cp))
+struct SanchezLacombeParameters{CPT, CTT, CDT, MWT}
+    characteristic_pressure_mpa::CPT
+    characteristic_temperature_k::CTT
+    characteristic_density_g_cm3::CDT
+    molecular_weight::MWT
+end
+"""
+    SanchezLacombeParameters(s::String)
+Attempt to look up a set of Sanchez Lacombe parameters, returns missing if not found.
+"""
+SanchezLacombeParameters(s::String) = SanchezLacombeParameters(ChemicalParameters(s))
+SanchezLacombeParameters(::Missing) = missing
+
+
+# SanchezLacombeParameters(cp::ChemicalParameters) = SanchezLacombeParameters(characteristic_pressure(cp), characteristic_temperature(cp), characteristic_density(cp), molecular_weight(cp))
 characteristic_pressure(slp::SanchezLacombeParameters) = slp.characteristic_pressure_mpa
 characteristic_temperature(slp::SanchezLacombeParameters) = slp.characteristic_temperature_k
 characteristic_density(slp::SanchezLacombeParameters) = slp.characteristic_density_g_cm3
@@ -108,40 +108,40 @@ function sanchez_lacombe_reduced_density(components, kij, mole_fractions, temper
     end
     
     # todo remove this and return a default, see if tests pass)
-    if length(reduced_densities) == 0  # roots couldn't do it quickly, we will have to iterate (this actually probably means the situation is not realistic, 
-        @warn "Sanchez Lacombe solver was unable to find a solution without iterating."
-        iter = 0
-        reduced_density = 0
-        const_sum = 1 - sum(φ ./ r_i)
-        while iter <= maxiters
-            new_reduced_density = 1 - exp(-(reduced_density^2 + reduced_pressure)/reduced_temperature - reduced_density*const_sum)
-            if abs(new_reduced_density - reduced_density) < tol
-                return new_reduced_density
-            else
-                reduced_density = new_reduced_density
-            end
-            iter+=1
-        end
-        throw(ErrorException("Max iters exceeded: " * string(maxiters)))
+    # if length(reduced_densities) == 0  # roots couldn't do it quickly, we will have to iterate (this actually probably means the situation is not realistic, 
+    #     @warn "Sanchez Lacombe solver was unable to find a solution without iterating."
+    #     iter = 0
+    #     reduced_density = 0
+    #     const_sum = 1 - sum(φ ./ r_i)
+    #     while iter <= maxiters
+    #         new_reduced_density = 1 - exp(-(reduced_density^2 + reduced_pressure)/reduced_temperature - reduced_density*const_sum)
+    #         if abs(new_reduced_density - reduced_density) < tol
+    #             return new_reduced_density
+    #         else
+    #             reduced_density = new_reduced_density
+    #         end
+    #         iter+=1
+    #     end
+    #     throw(ErrorException("Max iters exceeded: " * string(maxiters)))
     
-    end
+    # end
 
-    return reduced_densities[1]
+    return reduced_densities[1]  # see above, if this errors, it's almost certain the values you gave were not realistic
 
 end
 
-function sanchez_lacombe_chemical_potentials(components::AbstractVector{<:SanchezLacombeParameters}, kij, mass_fractions, density, temperature)
-    mixed_characteristic_density = sanchez_lacombe_mixed_characteristic_density(components, mass_fractions)
-    reduced_density = density / mixed_characteristic_density
-    φ = sanchez_lacombe_close_packed_volume_fractions(components, mass_fractions)
-    r_i0 = sanchez_lacombe_ri0.(components)
-    pure_characteristic_volume_i = sanchez_lacombe_pure_characteristic_volume.(components)
-    p★ = sanchez_lacombe_mixed_characteristic_pressure(components, φ, kij)
-    t★ = sanchez_lacombe_mixed_characteristic_temperature(components, φ, p★)
-    v★ = sanchez_lacombe_mixed_characteristic_volume(t★, p★)
-    r_i = sanchez_lacombe_ri(r_i0, pure_characteristic_volume_i, v★)
-    return sanchez_lacombe_chemical_potentials(components, kij, φ, r_i0, r_i, pure_characteristic_volume_i, reduced_density, temperature)
-end
+# function sanchez_lacombe_chemical_potentials(components::AbstractVector{<:SanchezLacombeParameters}, kij, mass_fractions, density, temperature)
+#     mixed_characteristic_density = sanchez_lacombe_mixed_characteristic_density(components, mass_fractions)
+#     reduced_density = density / mixed_characteristic_density
+#     φ = sanchez_lacombe_close_packed_volume_fractions(components, mass_fractions)
+#     r_i0 = sanchez_lacombe_ri0.(components)
+#     pure_characteristic_volume_i = sanchez_lacombe_pure_characteristic_volume.(components)
+#     p★ = sanchez_lacombe_mixed_characteristic_pressure(components, φ, kij)
+#     t★ = sanchez_lacombe_mixed_characteristic_temperature(components, φ, p★)
+#     v★ = sanchez_lacombe_mixed_characteristic_volume(t★, p★)
+#     r_i = sanchez_lacombe_ri(r_i0, pure_characteristic_volume_i, v★)
+#     return sanchez_lacombe_chemical_potentials(components, kij, φ, r_i0, r_i, pure_characteristic_volume_i, reduced_density, temperature)
+# end
 
 function sanchez_lacombe_chemical_potentials(components::AbstractVector{<:SanchezLacombeParameters}, kij, φ, r_i0, r_i, pure_characteristic_volume_i, reduced_density, temperature)
     # J/mol

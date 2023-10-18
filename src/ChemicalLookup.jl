@@ -30,12 +30,12 @@ Helper functions specific only to looking up these CSV files
 """
 
 # get a CSV file within the folder this function is written in
-function read_chemical_database_csv_file(filename::String)
-    read_file = read(
-        joinpath(@__DIR__, filename)
-    )
-    return CSV.File(read_file; header=true)
-end
+# function read_chemical_database_csv_file(filename::String)
+#     read_file = read(
+#         joinpath(@__DIR__, filename)
+#     )
+#     return CSV.File(read_file; header=true)
+# end
 
 # create a dict that will take all values present in the index_column and return the row they exist on
 # assumes all data in the indexing column will be unique and a string 

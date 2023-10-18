@@ -32,3 +32,4 @@ Toluene,92.14,,543,,402,,0.966,,,,,,,,,Modeling gas and vapor sorption in a poly
 PC,1.00E+09,,755,,534,,1.275,,,,,,,,,Nonequilibrium Lattice Fluids: A Predictive Model for the Solubility in Glassy Polymers,,
 PIM-1,1.00E+30,,872,,524,,1.438,,,,,,,,,https://doi.org/10.1016/j.fluid.2013.03.003,"Skeptical until vetted, density came from ""Mixed gas sorption in glassy polymeric membranes. III. CO2/CH4 mixtures in a polymer of intrinsic microporosity (PIM-1): Effect of temperature""",
 TPBO-0.25,1.00E+30,,900,,474,,1.6624,,,,,,,,,rho at T(k),1.393,278.15
+test,1,0.1,1,0.1,1,0.1,1,0.1,1,0.1,1,0.1,1,0.1,,,,

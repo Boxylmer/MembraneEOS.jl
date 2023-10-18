@@ -18,6 +18,9 @@
     pres = pressure(model_co2, vol, 273.15, [0.5, 0.5])
     @test 1. ≈ pres
 
+    @test ismissing(SanchezLacombeParameters(missing))
+    
+
     co2_pure = SanchezLacombeParameters(630.0, 300.0, 1.515, 44.0)
     model_co2_standard_method = MembraneEOS.SL(co2_pure, [0 0; 0 0])
     vol_standard_method = volume(model_co2_standard_method, 1., 273.15)

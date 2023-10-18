@@ -2,6 +2,11 @@
 
 # look up parameters from the database with a string
 methane = MembraneEOS.ChemicalParameters("CH4")
+@test MembraneEOS.name(methane) == "CH4"
+
+uncertain = MembraneEOS.ChemicalParameters("test")
+stripped = strip_measurement_to_value([uncertain])[1]
+@test MembraneEOS.critical_pressure(uncertain).val == MembraneEOS.critical_pressure(stripped)
 
 # if we define any values manually, we assume that the user isn't wanting to do database lookups
 manual_methane = MembraneEOS.ChemicalParameters("CH4", critical_pressure=100.0)
@@ -17,7 +22,6 @@ manual_methane = MembraneEOS.ChemicalParameters("CH4", critical_pressure=100.0, 
 # when we define manual values, everything else is of type Missing
 manual_methane = MembraneEOS.ChemicalParameters(critical_pressure=100.0)
 @test ismissing(manual_methane.name)
-
 
 
 # --- test_kij_database_lookups()
@@ -40,4 +44,17 @@ co2_ch4_missing = MembraneEOS.get_kij_matrix(MembraneEOS.PRKijLookup, ["CH4", "C
 @test isnan(co2_ch4_missing[1, 3])
 @test co2_ch4_missing[1, 1] == 10
 @test co2_ch4_missing[3, 3] == 10
+
+# test lower level functions
+@test MembraneEOS.is_chemical_in_database("CO2")
+@test !MembraneEOS.is_chemical_in_database("Not in the database")
+
+row1 = Dict("value" => 10, "error" => 2)
+@test MembraneEOS.parse_measurement_from_csv_row(row1, "value", "error") == 10 ± 2
+row2 = Dict("value" => 15, "error" => missing)
+@test MembraneEOS.parse_measurement_from_csv_row(row2, "value", "error") == 15
+row3 = Dict("value" => 20)
+@test_throws KeyError MembraneEOS.parse_measurement_from_csv_row(row3, "value", "error")
+row4 = Dict("another_key" => 25, "error" => 3)
+@test_throws KeyError MembraneEOS.parse_measurement_from_csv_row(row4, "value", "error")
 
