@@ -87,6 +87,8 @@ end
     v = volume(model, p, 273.15, mole_fractions)
     @test v ≈ 4 
 
+    @test fugacity(model, p, 273.15, mole_fractions)[1] ≈ 0.22393762151575458
+
     # test some constructors and make sure they get the results shown before
     nitrogen_methane_pc = MembraneEOS.critical_pressure.([nitrogen, methane])
     nitrogen_methane_tc = MembraneEOS.critical_temperature.([nitrogen, methane])

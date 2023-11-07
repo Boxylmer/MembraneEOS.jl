@@ -226,7 +226,7 @@ function fugacity(model::CubicModel, p_mpa, t_k, mole_fractions=[1])
     B = b_mixed * p_atm / (R_ATM_L_K_MOL * t_k)
     z = cubic_eos_compressibility(A, B, c1, c2)
     partial_pressures = compute_ideal_partial_pressures(p_atm, mole_fractions)
-    return cubic_eos_fugacities(mole_fractions, partial_pressures, z, A, A_i, B, B_i, model.kij, c1, c2) 
+    return cubic_eos_fugacities(mole_fractions, partial_pressures, z, A, A_i, B, B_i, model.kij, c1, c2) .* MembraneBase.MPA_PER_ATM
 end
 
 molecular_weight(model::CubicModel) = molecular_weight.(model.components)
